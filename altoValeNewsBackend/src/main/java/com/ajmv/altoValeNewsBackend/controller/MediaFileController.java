@@ -17,6 +17,7 @@ public class MediaFileController {
     @Autowired
     private MediaFileService fileService;
 
+    //TODO - Testar depois de Reescrever o Service
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getFile(@PathVariable Long id) throws SQLException {
         MediaFile mediaFile = fileService.getFile(id);
@@ -25,8 +26,8 @@ public class MediaFileController {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.valueOf(mediaFile.getFileType()));
-        headers.setContentDispositionFormData("attachment", mediaFile.getFileName());
+        headers.setContentType(MediaType.valueOf(mediaFile.getType()));
+        headers.setContentDispositionFormData("attachment", mediaFile.getName());
 
         return ResponseEntity.ok().headers(headers).body(mediaFile.getData());
     }

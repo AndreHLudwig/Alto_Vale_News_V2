@@ -33,8 +33,6 @@ public class PublicacaoController {
 
     private static final Logger LOGGER = Logger.getLogger(PublicacaoController.class.getName());
 
-    //TODO Substituir todos os métodos que tratam com Imagem/Video (que usam JpaRepository) por JDBC puro
-
     @GetMapping
     public List<Publicacao> getAll() {
         try {
@@ -67,10 +65,10 @@ public class PublicacaoController {
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,
             @RequestParam("categoria") String categoria,
-            @RequestParam("visibilidadeVip") Boolean visibilidadeVip,
-            @RequestParam("curtidas") Integer curtidas) {
+            @RequestParam("visibilidadeVip") Boolean visibilidadeVip/*,
+            @RequestParam("curtidas") Integer curtidas*/) {
         try {
-            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categoria, visibilidadeVip, curtidas);
+            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categoria, visibilidadeVip /*, curtidas*/);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while saving publicacao: " + e.getMessage());
@@ -115,10 +113,12 @@ public class PublicacaoController {
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,
             @RequestParam("categoria") Optional<String> categoria,
-            @RequestParam("visibilidadeVip") Optional<Boolean> visibilidadeVip,
-            @RequestParam("curtidas") Optional<Integer> curtidas) {
+            @RequestParam("visibilidadeVip") Optional<Boolean> visibilidadeVip/*,
+            @RequestParam("curtidas") Optional<Integer> curtidas*/) {
         try {
-            Publicacao publicacao = publicacaoService.partialUpdatePublicacao(id, editorId.orElse(null), titulo.orElse(null), data.orElse(null), texto.orElse(null), imageFile, videoFile, categoria.orElse(null), visibilidadeVip.orElse(null), curtidas.orElse(null));
+            Publicacao publicacao = publicacaoService.partialUpdatePublicacao(id, editorId.orElse(null),
+                    titulo.orElse(null), data.orElse(null), texto.orElse(null), imageFile,
+                    videoFile, categoria.orElse(null), visibilidadeVip.orElse(null)/*, curtidas.orElse(null)*/);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while partially updating publicacao: " + e.getMessage());
@@ -150,6 +150,7 @@ public class PublicacaoController {
     @PatchMapping("/{id}/like")
     public ResponseEntity<Publicacao> likePublicacao(@PathVariable Integer id) {
         try {
+            //TODO - refazer a lógica Service, verificando se o usuário já curtiu
             Publicacao publicacao = publicacaoService.likePublicacao(id);
             return ResponseEntity.ok(publicacao);
         } catch (IllegalArgumentException e) {
@@ -163,6 +164,7 @@ public class PublicacaoController {
     @PatchMapping("/{id}/dislike")
     public ResponseEntity<Publicacao> dislikePublicacao(@PathVariable Integer id) {
         try {
+            //TODO - refazer a lógica no Service, verificando se o usuário já descurtiu
             Publicacao publicacao = publicacaoService.dislikePublicacao(id);
             return ResponseEntity.ok(publicacao);
         } catch (IllegalArgumentException | SQLException e) {

@@ -2,6 +2,7 @@ package com.ajmv.altoValeNewsBackend.model;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -21,10 +22,10 @@ public class Publicacao {
 
     @ManyToOne
     @JoinColumn(name = "editor_id")
-    private Editor editor;
+    private Usuario editor;
 
     private String titulo;
-    private LocalDate data;
+    private LocalDateTime data;
     private String texto;
 
     @OneToOne
@@ -50,11 +51,11 @@ public class Publicacao {
         this.publicacaoId = publicacaoId;
     }
 
-    public Editor getEditor() {
+    public Usuario getEditor() {
         return editor;
     }
 
-    public void setEditor(Editor editor) {
+    public void setEditor(Usuario editor) {
         this.editor = editor;
     }
 
@@ -66,11 +67,11 @@ public class Publicacao {
         this.titulo = titulo;
     }
 
-    public LocalDate getData() {
+    public LocalDateTime getData() {
         return data;
     }
 
-    public void setData(LocalDate data) {
+    public void setData(LocalDateTime data) {
         this.data = data;
     }
 

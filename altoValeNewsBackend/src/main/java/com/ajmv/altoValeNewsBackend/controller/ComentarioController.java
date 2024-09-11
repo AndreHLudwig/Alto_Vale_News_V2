@@ -101,44 +101,46 @@ public class ComentarioController {
         }
     }
 
-    @PatchMapping("/{id}/like") // endpoint para curtir um comentário pelo ID
-    public ResponseEntity<Comentario> like(@PathVariable Integer id) {
-        try {
-            Optional<Comentario> comentarioOptional = comentarioRepository.findById(id);
-            if (comentarioOptional.isPresent()) {
-                Comentario comentarioExistente = comentarioOptional.get();
-                int curtidasAtuais = comentarioExistente.getCurtidas();
-                curtidasAtuais++;
-                comentarioExistente.setCurtidas(curtidasAtuais);
+    //TODO - Like usando curtidaRepository
+//    @PatchMapping("/{id}/like") // endpoint para curtir um comentário pelo ID
+//    public ResponseEntity<Comentario> like(@PathVariable Integer id) {
+//        try {
+//            Optional<Comentario> comentarioOptional = comentarioRepository.findById(id);
+//            if (comentarioOptional.isPresent()) {
+//                Comentario comentarioExistente = comentarioOptional.get();
+//                int curtidasAtuais = comentarioExistente.getCurtidas();
+//                curtidasAtuais++;
+//                comentarioExistente.setCurtidas(curtidasAtuais);
+//
+//                Comentario comentarioAtualizadoSalvo = comentarioRepository.save(comentarioExistente);
+//                return ResponseEntity.ok(comentarioAtualizadoSalvo);
+//            } else {
+//                return ResponseEntity.notFound().build(); // Retorna 404 Not Found se o comentário não for encontrado
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Retorna 500 Internal Server Error em caso de exceção
+//        }
+//    }
 
-                Comentario comentarioAtualizadoSalvo = comentarioRepository.save(comentarioExistente);
-                return ResponseEntity.ok(comentarioAtualizadoSalvo);
-            } else {
-                return ResponseEntity.notFound().build(); // Retorna 404 Not Found se o comentário não for encontrado
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Retorna 500 Internal Server Error em caso de exceção
-        }
-    }
-
-    @PatchMapping("/{id}/dislike") // endpoint para descurtir um comentário pelo ID
-    public ResponseEntity<Comentario> dislike(@PathVariable Integer id) {
-        try {
-            Optional<Comentario> comentarioOptional = comentarioRepository.findById(id);
-            if (comentarioOptional.isPresent()) {
-                Comentario comentarioExistente = comentarioOptional.get();
-                int curtidasAtuais = comentarioExistente.getCurtidas();
-                curtidasAtuais--;
-                comentarioExistente.setCurtidas(curtidasAtuais);
-
-                Comentario comentarioAtualizadoSalvo = comentarioRepository.save(comentarioExistente);
-                return ResponseEntity.ok(comentarioAtualizadoSalvo);
-            } else {
-                return ResponseEntity.notFound().build(); // Retorna 404 Not Found se o comentário não for encontrado
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Retorna 500 Internal Server Error em caso de exceção
-        }
-    }
+    //TODO - Dislike usando curtidaRepository
+//    @PatchMapping("/{id}/dislike") // endpoint para descurtir um comentário pelo ID
+//    public ResponseEntity<Comentario> dislike(@PathVariable Integer id) {
+//        try {
+//            Optional<Comentario> comentarioOptional = comentarioRepository.findById(id);
+//            if (comentarioOptional.isPresent()) {
+//                Comentario comentarioExistente = comentarioOptional.get();
+//                int curtidasAtuais = comentarioExistente.getCurtidas();
+//                curtidasAtuais--;
+//                comentarioExistente.setCurtidas(curtidasAtuais);
+//
+//                Comentario comentarioAtualizadoSalvo = comentarioRepository.save(comentarioExistente);
+//                return ResponseEntity.ok(comentarioAtualizadoSalvo);
+//            } else {
+//                return ResponseEntity.notFound().build(); // Retorna 404 Not Found se o comentário não for encontrado
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Retorna 500 Internal Server Error em caso de exceção
+//        }
+//    }
 
 }

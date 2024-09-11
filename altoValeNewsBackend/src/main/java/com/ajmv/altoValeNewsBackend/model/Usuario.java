@@ -8,28 +8,39 @@ import lombok.NoArgsConstructor;
 
 @Table(name = "usuario")
 @Entity(name = "usuario")
-@Inheritance(strategy=InheritanceType.JOINED)
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of="userId")
 public class Usuario {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @Column(name = "user_id")
-    protected Integer userId;
-    protected String nome;
-    protected String sobrenome;
-    protected String email;
-    protected String cpf;
-    protected String endereco;
-    protected String cidade;
-    protected String estado;
-    protected String cep;
-    protected String senhahash;
+    private Integer userId;
+    private String nome;
+    private String sobrenome;
+    private String email;
+    private String cpf;
+    private String endereco;
+    private String cidade;
+    private String estado;
+    private String cep;
+    private String senhahash;
     @Enumerated(EnumType.ORDINAL)
-    protected TipoUsuario tipo;
+    private TipoUsuario tipo;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    //TODO - verificar relacionamento
+    private Assinatura assinatura;
 
     @Transient // indica ao JPA que este campo não deve ser persistido - somente usado no objeto java para fazer comparações na hora do login com o hash.
-    protected String senha;
+    private String senha;
+
+    public Assinatura getAssinatura() {
+        return assinatura;
+    }
+
+    public void setAssinatura(Assinatura assinatura) {
+        this.assinatura = assinatura;
+    }
 
     public Integer getUserId() {
         return userId;

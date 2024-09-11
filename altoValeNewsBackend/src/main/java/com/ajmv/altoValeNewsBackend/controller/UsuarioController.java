@@ -42,6 +42,8 @@ public class UsuarioController {
         }
     }
 
+    //TODO - Criar Assinatura para o Usuario
+    //TODO - Forçar tipoUsuario = 0
     @PostMapping
     public ResponseEntity<Usuario> createUsuario(@RequestBody Usuario novoUsuario) {
         try {
@@ -125,6 +127,8 @@ public class UsuarioController {
                 if (usuarioAtualizado.getCep() != null) {
                     usuarioExistente.setCep(usuarioAtualizado.getCep());
                 }
+
+                //TODO - Verificar com o Farah para onde mover esse código
                 if (usuarioAtualizado.getTipo() != null) {
                     usuarioExistente.setTipo(usuarioAtualizado.getTipo());
                 }

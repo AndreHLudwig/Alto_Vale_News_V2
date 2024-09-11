@@ -3,23 +3,18 @@ package com.ajmv.altoValeNewsBackend.model;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 
-import java.sql.Blob;
-
-@EqualsAndHashCode(of="id")
-@Table(name="media_file")
-@Entity(name="media_file")
+@EqualsAndHashCode(of = "id")
+@Table(name = "media_file")
+@Entity(name = "media_file")
 public class MediaFile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fileName;
-    private String fileType;
-
-    @Lob
-    @Column(name = "data")
-    private byte[] data;
+    private String name;
+    private String type;
+    private String path;
 
     public Long getId() {
         return id;
@@ -29,28 +24,27 @@ public class MediaFile {
         this.id = id;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getName() {
+        return name;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setName(String fileName) {
+        this.name = fileName;
     }
 
-    public String getFileType() {
-        return fileType;
+    public String getType() {
+        return type;
     }
 
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
+    public void setType(String fileType) {
+        this.type = fileType;
     }
 
-    public byte[] getData() {
-        return data;
+    public String getPath() {
+        return path;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
+    public void setPath(String path) {
+        this.path = path;
     }
-
 }
