@@ -1,18 +1,9 @@
 package com.ajmv.altoValeNewsBackend.controller;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
-
-import com.ajmv.altoValeNewsBackend.service.PublicacaoService;
 import com.ajmv.altoValeNewsBackend.model.Publicacao;
 import com.ajmv.altoValeNewsBackend.repository.PublicacaoRepository;
-
+import com.ajmv.altoValeNewsBackend.service.PublicacaoService;
 import org.json.JSONObject;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -20,6 +11,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("publicacao")
@@ -108,7 +107,7 @@ public class PublicacaoController {
             @PathVariable Integer id,
             @RequestParam("editorId") Optional<Integer> editorId,
             @RequestParam("titulo") Optional<String> titulo,
-            @RequestParam("data") @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> data,
+            @RequestParam("data") @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDateTime> data,
             @RequestParam("texto") Optional<String> texto,
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,

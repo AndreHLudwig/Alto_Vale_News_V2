@@ -1,7 +1,6 @@
 package com.ajmv.altoValeNewsBackend.model;
 
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

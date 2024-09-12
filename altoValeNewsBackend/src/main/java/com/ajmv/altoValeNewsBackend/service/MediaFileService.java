@@ -1,15 +1,14 @@
 package com.ajmv.altoValeNewsBackend.service;
 
+import com.ajmv.altoValeNewsBackend.model.MediaFile;
+import com.ajmv.altoValeNewsBackend.repository.MediaFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.ajmv.altoValeNewsBackend.model.MediaFile;
-import com.ajmv.altoValeNewsBackend.repository.MediaFileRepository;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.SQLException;
 
 //TODO - Gravar arquivos no server e salvar usando Repository
 
