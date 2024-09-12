@@ -7,15 +7,36 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Table(name = "assinatura")
 @Entity(name = "assinatura")
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of="assinaturaId")
 public class Assinatura {
+
     @Id
     private Integer assinaturaId;
-    //TODO - atributos vencimento e ativo
+
+    private LocalDateTime vencimento;
+    private boolean ativo;
+
+    public LocalDateTime getVencimento() {
+        return vencimento;
+    }
+
+    public void setVencimento(LocalDateTime vencimento) {
+        this.vencimento = vencimento;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
 
     public void setAssinaturaId(Integer assinaturaId) {
         this.assinaturaId = assinaturaId;
@@ -24,6 +45,5 @@ public class Assinatura {
     public Integer getAssinaturaId() {
         return assinaturaId;
     }
-    //TODO
 
 }

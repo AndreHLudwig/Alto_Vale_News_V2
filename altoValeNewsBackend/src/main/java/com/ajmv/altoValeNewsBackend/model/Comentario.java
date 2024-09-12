@@ -18,7 +18,7 @@ public class Comentario {
     @Column(name = "publicacao_id")
     private Integer publicacaoId;
     @ManyToOne
-    @JoinColumn(name = "userId") // Nome da coluna que representa a chave estrangeira na tabela de Comentario
+    @JoinColumn(name = "user_id") // Nome da coluna que representa a chave estrangeira na tabela de Comentario
     private Usuario usuario;
     private Date data;
     //TODO @incluirDataAtualizacao
