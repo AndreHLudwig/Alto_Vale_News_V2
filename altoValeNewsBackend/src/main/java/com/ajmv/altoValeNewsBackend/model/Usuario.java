@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Entity(name = "usuario")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of="userId")
+@EqualsAndHashCode(of = "userId")
 public class Usuario {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @Column(name = "user_id")
     private Integer userId;
     private String nome;
@@ -26,20 +27,21 @@ public class Usuario {
     @Enumerated(EnumType.ORDINAL)
     private TipoUsuario tipo;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    //TODO - verificar relacionamento
-    private Assinatura assinatura;
+//    @OneToOne(cascade = CascadeType.ALL)
+//    //TODO - verificar relacionamento
+//    private Assinatura assinatura;
 
-    @Transient // indica ao JPA que este campo não deve ser persistido - somente usado no objeto java para fazer comparações na hora do login com o hash.
+    @Transient
+    // indica ao JPA que este campo não deve ser persistido - somente usado no objeto java para fazer comparações na hora do login com o hash.
     private String senha;
 
-    public Assinatura getAssinatura() {
-        return assinatura;
-    }
-
-    public void setAssinatura(Assinatura assinatura) {
-        this.assinatura = assinatura;
-    }
+//    public Assinatura getAssinatura() {
+//        return assinatura;
+//    }
+//
+//    public void setAssinatura(Assinatura assinatura) {
+//        this.assinatura = assinatura;
+//    }
 
     public Integer getUserId() {
         return userId;

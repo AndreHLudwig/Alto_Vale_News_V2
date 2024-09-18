@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "comentario")
 @Entity(name = "comentario")
@@ -21,10 +23,12 @@ public class Comentario {
     @JoinColumn(name = "user_id") // Nome da coluna que representa a chave estrangeira na tabela de Comentario
     private Usuario usuario;
     private Date data;
-    //TODO @incluirDataAtualizacao
 
     private String texto;
-    private Integer curtidas;
+
+    @OneToMany(mappedBy = "comentario", fetch = FetchType.LAZY)
+    @Transient //FIXME Hibernate está reclamando ao tentar curtir um comentario
+    private List<Curtida> curtidas = new ArrayList<>();
 
     public Integer getComentarioId() {
         return comentarioId;
@@ -66,12 +70,13 @@ public class Comentario {
         this.texto = texto;
     }
 
-    public Integer getCurtidas() {
+    public List<Curtida> getCurtidas() {
         return curtidas;
     }
 
-    public void setCurtidas(Integer curtidas) {
+    public void setCurtidas(List<Curtida> curtidas) {
         this.curtidas = curtidas;
     }
+
 }
 

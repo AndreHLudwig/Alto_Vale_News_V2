@@ -16,15 +16,15 @@ public class Curtida {
     private Integer curtidaId;
 
     @ManyToOne
-    @JoinColumn(name = "comentario_id", referencedColumnName = "comentario_ID")
+    @JoinColumn(name = "comentario_id")
     private Comentario comentario;
 
     @ManyToOne
-    @JoinColumn(name = "publicacao_id", referencedColumnName = "publicacao_ID")
+    @JoinColumn(name = "publicacao_id")
     private Publicacao publicacao;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", referencedColumnName = "user_ID")
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
     @PrePersist
@@ -34,7 +34,7 @@ public class Curtida {
             throw new IllegalStateException("Curtida deve estar associada apenas a um comentário ou a uma publicação.");
         }
     }
-    
+
     public Integer getCurtidaId() {
         return curtidaId;
     }
