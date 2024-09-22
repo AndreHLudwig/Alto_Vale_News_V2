@@ -1,17 +1,16 @@
 package com.ajmv.altoValeNewsBackend.service;
 
-import com.ajmv.altoValeNewsBackend.model.Comentario;
-import com.ajmv.altoValeNewsBackend.model.Usuario;
+import com.ajmv.altoValeNewsBackend.model.*;
+import com.ajmv.altoValeNewsBackend.repository.CategoriaRepository;
 import com.ajmv.altoValeNewsBackend.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.ajmv.altoValeNewsBackend.model.Publicacao;
-import com.ajmv.altoValeNewsBackend.model.MediaFile;
 import com.ajmv.altoValeNewsBackend.repository.PublicacaoRepository;
 
 import java.io.IOException;
@@ -33,21 +32,16 @@ public class PublicacaoService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private PublicacaoRepository publicacaoRepository;
-
-    @Autowired
+    private CategoriaRepository categoriaRepository;
     private UsuarioRepository editorRepository;
-
-    @Autowired
     private MediaFileService fileService;
-
-    @Autowired
     private ComentarioService comentarioService;
 
-//    @Autowired
-//    private UsuarioService editorService; //TODO - Utilizar o editorRepository
+    @Autowired
+    public PublicacaoService(PublicacaoRepository publicacaoRepository, CategoriaRepository categoriaRepository, UsuarioRepository editorRepository, MediaFileService fileService) {
+
+    }
 
     private static final Logger LOGGER = Logger.getLogger(PublicacaoService.class.getName());
 
@@ -160,7 +154,7 @@ public class PublicacaoService {
     @Transactional
     public Publicacao savePublicacao(Integer editorId, String titulo, LocalDate data, String texto,
                                      MultipartFile imageFile, MultipartFile videoFile,
-                                     String categoria, Boolean visibilidadeVip /*, Integer curtidas*/) throws IOException, SQLException {
+                                     List<Categoria> categorias, Boolean visibilidadeVip /*, Integer curtidas*/) throws IOException, SQLException {
         //TODO
 //        Editor editor = editorRepository.findById(editorId)
 //                .orElseThrow(() -> new IllegalArgumentException("Editor não encontrado: " + editorId));
@@ -201,9 +195,20 @@ public class PublicacaoService {
         String titulo = publicacaoJson.optString("titulo", null);
         LocalDateTime data = LocalDateTime.parse(publicacaoJson.optString("data", null));
         String texto = publicacaoJson.optString("texto", null);
-        String categoria = publicacaoJson.optString("categoria", null);
         Boolean visibilidadeVip = publicacaoJson.optBoolean("visibilidadeVip", false);
-        //Integer curtidas = publicacaoJson.optInt("curtidas", 0);
+
+        // Tratamento da lista de categorias
+        List<Categoria> categorias = new ArrayList<>();
+        JSONArray categoriasArray = publicacaoJson.optJSONArray("categorias");
+        if (categoriasArray != null) {
+            for (int i = 0; i < categoriasArray.length(); i++) {
+                JSONObject categoriaObj = categoriasArray.getJSONObject(i);
+                Integer categoriaId = categoriaObj.getInt("categoriaId");
+                Categoria categoria = categoriaRepository.findById(categoriaId)
+                        .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada: " + categoriaId));
+                categorias.add(categoria);
+            }
+        }
 
         Usuario editor = null;
         if (editorId != null) {
@@ -214,9 +219,8 @@ public class PublicacaoService {
         publicacao.setTitulo(titulo);
         publicacao.setData(data);
         publicacao.setTexto(texto);
-        publicacao.setCategoria(categoria);
+        publicacao.setCategorias(categorias);
         publicacao.setVisibilidadeVip(visibilidadeVip);
-        //publicacao.setCurtidas(curtidas);
 
         // Apesar de ser um PUT, executamos o serviço de arquivos somente se houver algo a ser salvo
         MediaFile imagem = null;
@@ -235,7 +239,7 @@ public class PublicacaoService {
     }
 
     public Publicacao partialUpdatePublicacao(Integer id, Integer editorId, String titulo, LocalDateTime data, String texto, MultipartFile imageFile, MultipartFile videoFile,
-                                              String categoria, Boolean visibilidadeVip/*, Integer curtidas*/) throws IOException, SQLException {
+                                              List<Categoria> categorias, Boolean visibilidadeVip/*, Integer curtidas*/) throws IOException, SQLException {
         Publicacao publicacao = publicacaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Publicação não encontrada: " + id));
 
@@ -254,8 +258,8 @@ public class PublicacaoService {
         if (texto != null) {
             publicacao.setTexto(texto);
         }
-        if (categoria != null) {
-            publicacao.setCategoria(categoria);
+        if (categorias != null) {
+            publicacao.setCategorias(categorias);
         }
         if (visibilidadeVip != null) {
             publicacao.setVisibilidadeVip(visibilidadeVip);

@@ -1,5 +1,6 @@
 package com.ajmv.altoValeNewsBackend.controller;
 
+import com.ajmv.altoValeNewsBackend.model.Categoria;
 import com.ajmv.altoValeNewsBackend.model.Publicacao;
 import com.ajmv.altoValeNewsBackend.repository.PublicacaoRepository;
 import com.ajmv.altoValeNewsBackend.service.PublicacaoService;
@@ -63,11 +64,11 @@ public class PublicacaoController {
             @RequestParam("texto") String texto,
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,
-            @RequestParam("categoria") String categoria,
+            @RequestParam("categorias") List<Categoria> categorias,
             @RequestParam("visibilidadeVip") Boolean visibilidadeVip/*,
             @RequestParam("curtidas") Integer curtidas*/) {
         try {
-            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categoria, visibilidadeVip /*, curtidas*/);
+            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categorias, visibilidadeVip /*, curtidas*/);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while saving publicacao: " + e.getMessage());
@@ -111,13 +112,13 @@ public class PublicacaoController {
             @RequestParam("texto") Optional<String> texto,
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,
-            @RequestParam("categoria") Optional<String> categoria,
+            @RequestParam("categorias") Optional<List<Categoria>> categorias,
             @RequestParam("visibilidadeVip") Optional<Boolean> visibilidadeVip/*,
             @RequestParam("curtidas") Optional<Integer> curtidas*/) {
         try {
             Publicacao publicacao = publicacaoService.partialUpdatePublicacao(id, editorId.orElse(null),
                     titulo.orElse(null), data.orElse(null), texto.orElse(null), imageFile,
-                    videoFile, categoria.orElse(null), visibilidadeVip.orElse(null)/*, curtidas.orElse(null)*/);
+                    videoFile, categorias.orElse(null), visibilidadeVip.orElse(null)/*, curtidas.orElse(null)*/);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while partially updating publicacao: " + e.getMessage());

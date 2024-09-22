@@ -19,28 +19,29 @@ public class Publicacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer publicacaoId;
-
     @ManyToOne
     @JoinColumn(name = "editor_id")
     private Usuario editor;
-
     private String titulo;
     private LocalDateTime data;
     private String texto;
-
     @OneToOne
     @JoinColumn(name = "imagem_id")
     private MediaFile imagem;
-
     @OneToOne
     @JoinColumn(name = "video_id")
     private MediaFile video;
-
-    private String categoria;
+    @ManyToMany
+    @JoinTable(
+            name = "categoria_publicacao",
+            joinColumns = @JoinColumn(name = "publicacao_id"),
+            inverseJoinColumns = @JoinColumn(name = "categoria_id")
+    )
+    private List<Categoria> categorias;
     private Boolean visibilidadeVip;
-    private Integer curtidas;
-
-    @OneToMany(mappedBy = "publicacaoId")
+    @OneToMany(mappedBy = "publicacao")
+    private List<Curtida> curtidas;
+    @OneToMany(mappedBy = "publicacao")
     private List<Comentario> comentarios;
 
     public Integer getPublicacaoId() {
@@ -99,12 +100,12 @@ public class Publicacao {
         this.video = video;
     }
 
-    public String getCategoria() {
-        return categoria;
+    public List<Categoria> getCategorias() {
+        return categorias;
     }
 
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
+    public void setCategorias(List<Categoria> categorias) {
+        this.categorias = categorias;
     }
 
     public Boolean isVisibilidadeVip() {
@@ -115,11 +116,11 @@ public class Publicacao {
         this.visibilidadeVip = visibilidadeVip;
     }
 
-    public Integer getCurtidas() {
+    public List<Curtida> getCurtidas() {
         return curtidas;
     }
 
-    public void setCurtidas(Integer curtidas) {
+    public void setCurtidas(List<Curtida> curtidas) {
         this.curtidas = curtidas;
     }
 
@@ -130,6 +131,5 @@ public class Publicacao {
     public void setComentarios(List<Comentario> comentarios) {
         this.comentarios = comentarios;
     }
-
 
 }

@@ -1,5 +1,6 @@
 package com.ajmv.altoValeNewsBackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -17,8 +18,10 @@ import java.util.List;
 public class Comentario {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer comentarioId;
-    @Column(name = "publicacao_id")
-    private Integer publicacaoId;
+    @ManyToOne
+    @JoinColumn(name = "publicacao_id")
+    @JsonIgnore
+    private Publicacao publicacao;
     @ManyToOne
     @JoinColumn(name = "user_id") // Nome da coluna que representa a chave estrangeira na tabela de Comentario
     private Usuario usuario;
@@ -27,8 +30,8 @@ public class Comentario {
     private String texto;
 
     @OneToMany(mappedBy = "comentario", fetch = FetchType.LAZY)
-    @Transient //FIXME Hibernate está reclamando ao tentar curtir um comentario
-    private List<Curtida> curtidas = new ArrayList<>();
+//    @Transient //FIXME Hibernate está reclamando ao tentar curtir um comentario
+    private List<Curtida> curtidas; //= new ArrayList<>();
 
     public Integer getComentarioId() {
         return comentarioId;
@@ -38,12 +41,12 @@ public class Comentario {
         this.comentarioId = comentarioId;
     }
 
-    public Integer getPublicacaoId() {
-        return publicacaoId;
+    public Publicacao getPublicacao() {
+        return publicacao;
     }
 
-    public void setPublicacaoId(Integer publicacaoId) {
-        this.publicacaoId = publicacaoId;
+    public void setPublicacao(Publicacao publicacao) {
+        this.publicacao = publicacao;
     }
 
     public Usuario getUsuario() {

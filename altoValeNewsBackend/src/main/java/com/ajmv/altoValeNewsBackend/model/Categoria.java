@@ -2,6 +2,7 @@ package com.ajmv.altoValeNewsBackend.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -13,15 +14,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "categoriaId")
 public class Categoria {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer categoriaId;
-
 	private String nome;
-
 	//TODO verificar LazyFetch
-	@OneToMany(mappedBy = "categoriaId")
+	@ManyToMany(mappedBy = "categorias")
+	@JsonIgnore
 	private List<Publicacao> publicacoes;
 
 	public Integer getCategoriaId() {

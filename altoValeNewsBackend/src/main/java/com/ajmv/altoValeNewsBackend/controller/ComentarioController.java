@@ -45,7 +45,7 @@ public class ComentarioController {
         return comentarioService.like(id, usuarioLogado);
     }
 
-    @DeleteMapping("/{id}/unlike")
+    @DeleteMapping("/{id}/like")
     public ResponseEntity<Comentario> unlikeComentario(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
         return comentarioService.unlike(id, usuarioLogado);
     }
