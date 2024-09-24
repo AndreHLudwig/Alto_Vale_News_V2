@@ -1,19 +1,19 @@
 --USUÁRIOS
 INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
 VALUES (1, 'Admin', 'Admin', 'admin@mail.com', '57266056918', 'Rua dos adms', 'Ibirama', 'SC', '89140-000',
-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 3);
+        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 3);
 
 INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
 VALUES (2, 'Andre', 'Ludwig', 'andre@mail.com', '06985933599', 'Rua Vargas', 'Ibirama', 'SC', '89140-000',
-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 2);
+        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 2);
 
 INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
 VALUES (3, 'Mateus', 'Dido', 'mateus@mail.com', '04235874047', 'Rua 15', 'Ibirama', 'SC', '89140-000',
-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 1);
+        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 1);
 
 INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
 VALUES (4, 'Geraldo', 'Varela', 'geraldo@mail.com', '83022855958', 'Rua 27', 'Ibirama', 'SC', '89140-000',
-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 0);
+        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 0);
 
 --ASSINATURAS
 INSERT INTO public.assinatura (assinatura_id, vencimento, ativo)

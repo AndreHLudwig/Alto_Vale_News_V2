@@ -2,6 +2,7 @@ package com.ajmv.altoValeNewsBackend.controller;
 
 import com.ajmv.altoValeNewsBackend.exception.CPFInvalidoException;
 import com.ajmv.altoValeNewsBackend.exception.EmailJaCadastradoException;
+import com.ajmv.altoValeNewsBackend.model.TipoUsuario;
 import com.ajmv.altoValeNewsBackend.model.Usuario;
 import com.ajmv.altoValeNewsBackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +43,15 @@ public class UsuarioController {
         }
     }
 
-    //TODO - Criar Assinatura para o Usuario
-    //TODO - Forçar tipoUsuario = 0
     @PostMapping
     public ResponseEntity<Usuario> createUsuario(@RequestBody Usuario novoUsuario) {
         try {
             String senhaPlana = novoUsuario.getSenha();
             novoUsuario.setSenhahash(passwordEncoder.encode(senhaPlana));
             novoUsuario.setSenha(null);
+
+            novoUsuario.criarAssinatura();
+            novoUsuario.setTipo(TipoUsuario.USUARIO);
 
             Usuario usuarioCriado = repository.save(novoUsuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
@@ -128,10 +130,14 @@ public class UsuarioController {
                     usuarioExistente.setCep(usuarioAtualizado.getCep());
                 }
 
-                //TODO - Verificar com o Farah para onde mover esse código
-                if (usuarioAtualizado.getTipo() != null) {
-                    usuarioExistente.setTipo(usuarioAtualizado.getTipo());
-                }
+                /*
+                TODO - Verificar com o Farah para onde mover esse código
+                TODO - Criar um endpoint específico para gerenciar 1- alteração de tipos para administrador; e 2- gerenciar assinaturas
+                */
+
+//                if (usuarioAtualizado.getTipo() != null) {
+//                    usuarioExistente.setTipo(usuarioAtualizado.getTipo());
+//                }
 
                 Usuario usuarioAtualizadoSalvo = repository.save(usuarioExistente);
                 return ResponseEntity.ok(usuarioAtualizadoSalvo);
