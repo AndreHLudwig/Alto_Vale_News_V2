@@ -1,0 +1,193 @@
+diff --git a/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/controller/UsuarioController.java b/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/controller/UsuarioController.java
+index f4e551a..4fd9aa1 100644
+--- a/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/controller/UsuarioController.java
++++ b/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/controller/UsuarioController.java
+@@ -2,7 +2,7 @@ package com.ajmv.altoValeNewsBackend.controller;
+ 
+ import com.ajmv.altoValeNewsBackend.exception.CPFInvalidoException;
+ import com.ajmv.altoValeNewsBackend.exception.EmailJaCadastradoException;
+-import com.ajmv.altoValeNewsBackend.model.Assinatura;
++import com.ajmv.altoValeNewsBackend.model.TipoUsuario;
+ import com.ajmv.altoValeNewsBackend.model.Usuario;
+ import com.ajmv.altoValeNewsBackend.repository.UsuarioRepository;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -43,8 +43,6 @@ public class UsuarioController {
+         }
+     }
+ 
+-    //TODO - Criar Assinatura para o Usuario
+-    //TODO - Forçar tipoUsuario = 0
+     @PostMapping
+     public ResponseEntity<Usuario> createUsuario(@RequestBody Usuario novoUsuario) {
+         try {
+@@ -52,9 +50,8 @@ public class UsuarioController {
+             novoUsuario.setSenhahash(passwordEncoder.encode(senhaPlana));
+             novoUsuario.setSenha(null);
+ 
+-            //TODO ver se isso aqui funciona assim -- pode ter problema com a pfk da assinatura
+-            Assinatura assinatura = new Assinatura();
+-            novoUsuario.setAssinatura(assinatura);
++            novoUsuario.criarAssinatura();
++            novoUsuario.setTipo(TipoUsuario.USUARIO);
+ 
+             Usuario usuarioCriado = repository.save(novoUsuario);
+             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
+diff --git a/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Assinatura.java b/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Assinatura.java
+index 47f3ef8..dbbb4a9 100644
+--- a/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Assinatura.java
++++ b/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Assinatura.java
+@@ -1,8 +1,7 @@
+ package com.ajmv.altoValeNewsBackend.model;
+ 
+-import jakarta.persistence.Entity;
+-import jakarta.persistence.Id;
+-import jakarta.persistence.Table;
++import com.fasterxml.jackson.annotation.JsonIgnore;
++import jakarta.persistence.*;
+ import lombok.AllArgsConstructor;
+ import lombok.EqualsAndHashCode;
+ import lombok.NoArgsConstructor;
+@@ -13,15 +12,29 @@ import java.time.LocalDateTime;
+ @Entity(name = "assinatura")
+ @NoArgsConstructor
+ @AllArgsConstructor
+-@EqualsAndHashCode(of="assinaturaId")
++@EqualsAndHashCode(of = "assinaturaId")
+ public class Assinatura {
+-
+     @Id
++    @Column(name = "assinatura_id")
+     private Integer assinaturaId;
+ 
++    @OneToOne
++    @MapsId //"Use o ID do Usuario como meu próprio ID"
++    @JoinColumn(name = "assinatura_id")
++    @JsonIgnore
++    private Usuario usuario;
++
+     private LocalDateTime vencimento;
+     private boolean ativo;
+ 
++    public Usuario getUsuario() {
++        return usuario;
++    }
++
++    public void setUsuario(Usuario usuario) {
++        this.usuario = usuario;
++    }
++
+     public LocalDateTime getVencimento() {
+         return vencimento;
+     }
+diff --git a/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Usuario.java b/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Usuario.java
+index aaa4795..4d6f700 100644
+--- a/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Usuario.java
++++ b/altoValeNewsBackend/src/main/java/com/ajmv/altoValeNewsBackend/model/Usuario.java
+@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
+ import lombok.EqualsAndHashCode;
+ import lombok.NoArgsConstructor;
+ 
++import java.time.LocalDateTime;
++
+ @Table(name = "usuario")
+ @Entity(name = "usuario")
+ @NoArgsConstructor
+@@ -12,9 +14,11 @@ import lombok.NoArgsConstructor;
+ @EqualsAndHashCode(of = "userId")
+ public class Usuario {
+     @Id
+-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+-//    @Column(name = "user_id")
++    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq")
++    @SequenceGenerator(name = "usuario_seq", sequenceName = "usuario_user_id_seq", allocationSize = 1)
++    @Column(name = "user_id")
+     private Integer userId;
++
+     private String nome;
+     private String sobrenome;
+     private String email;
+@@ -24,24 +28,33 @@ public class Usuario {
+     private String estado;
+     private String cep;
+     private String senhahash;
++
+     @Enumerated(EnumType.ORDINAL)
+     private TipoUsuario tipo;
+ 
+-//    @OneToOne(cascade = CascadeType.ALL)
+-//    //TODO - verificar relacionamento
+-//    private Assinatura assinatura;
++    @OneToOne(cascade = CascadeType.ALL, mappedBy = "usuario")
++    private Assinatura assinatura;
+ 
+     @Transient
+     // indica ao JPA que este campo não deve ser persistido - somente usado no objeto java para fazer comparações na hora do login com o hash.
+     private String senha;
+ 
+-//    public Assinatura getAssinatura() {
+-//        return assinatura;
+-//    }
+-//
+-//    public void setAssinatura(Assinatura assinatura) {
+-//        this.assinatura = assinatura;
+-//    }
++    public Assinatura getAssinatura() {
++        return assinatura;
++    }
++
++    public void setAssinatura(Assinatura assinatura) {
++        this.assinatura = assinatura;
++    }
++
++    public void criarAssinatura() {
++        if (this.assinatura == null) {
++            this.assinatura = new Assinatura();
++            this.assinatura.setUsuario(this);
++            this.assinatura.setVencimento(LocalDateTime.now().plusMonths(1));
++            this.assinatura.setAtivo(false);
++        }
++    }
+ 
+     public Integer getUserId() {
+         return userId;
+diff --git a/altoValeNewsBackend/src/main/resources/application.properties b/altoValeNewsBackend/src/main/resources/application.properties
+index 775ff51..799e5d8 100644
+--- a/altoValeNewsBackend/src/main/resources/application.properties
++++ b/altoValeNewsBackend/src/main/resources/application.properties
+@@ -4,6 +4,8 @@ spring.datasource.username=postgres
+ spring.datasource.password=postgres
+ spring.datasource.driver-class-name=org.postgresql.Driver
+ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
++spring.jpa.properties.hibernate.format_sql=true
++spring.jpa.show-sql=true
+ #spring.jpa.hibernate.ddl-auto=update
+ # Maximum file size (in bytes) that can be accepted by the application
+ spring.servlet.multipart.max-file-size=10MB
+diff --git a/altoValeNewsBackend/src/main/sql/dml/alto_vale_news_dml.sql b/altoValeNewsBackend/src/main/sql/dml/alto_vale_news_dml.sql
+index 2ece609..2992c0c 100644
+--- a/altoValeNewsBackend/src/main/sql/dml/alto_vale_news_dml.sql
++++ b/altoValeNewsBackend/src/main/sql/dml/alto_vale_news_dml.sql
+@@ -1,19 +1,19 @@
+ --USUÁRIOS
+ INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
+ VALUES (1, 'Admin', 'Admin', 'admin@mail.com', '57266056918', 'Rua dos adms', 'Ibirama', 'SC', '89140-000',
+-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 3);
++        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 3);
+ 
+ INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
+ VALUES (2, 'Andre', 'Ludwig', 'andre@mail.com', '06985933599', 'Rua Vargas', 'Ibirama', 'SC', '89140-000',
+-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 2);
++        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 2);
+ 
+ INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
+ VALUES (3, 'Mateus', 'Dido', 'mateus@mail.com', '04235874047', 'Rua 15', 'Ibirama', 'SC', '89140-000',
+-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 1);
++        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 1);
+ 
+ INSERT INTO public.usuario (user_id, nome, sobrenome, email, cpf, endereco, cidade, estado, cep, senhahash, tipo)
+ VALUES (4, 'Geraldo', 'Varela', 'geraldo@mail.com', '83022855958', 'Rua 27', 'Ibirama', 'SC', '89140-000',
+-        '$2a$10$zk/Do4rfBFNv0aFZRAsaZOznfCdBhneu89827/4e4zuaKkTvWnW6q', 0);
++        '$2a$10$psAnY6PFVN.ECCbq0WYO8e0tx2qeCFZ.K6Me8LQpE0sPJ7K7YJVoi', 0);
+ 
+ --ASSINATURAS
+ INSERT INTO public.assinatura (assinatura_id, vencimento, ativo)

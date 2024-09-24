@@ -1,8 +1,7 @@
 package com.ajmv.altoValeNewsBackend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -13,14 +12,28 @@ import java.time.LocalDateTime;
 @Entity(name = "assinatura")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of="assinaturaId")
+@EqualsAndHashCode(of = "assinaturaId")
 public class Assinatura {
-
     @Id
+    @Column(name = "assinatura_id")
     private Integer assinaturaId;
+
+    @OneToOne
+    @MapsId //"Use o ID do Usuario como meu próprio ID"
+    @JoinColumn(name = "assinatura_id")
+    @JsonIgnore
+    private Usuario usuario;
 
     private LocalDateTime vencimento;
     private boolean ativo;
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
     public LocalDateTime getVencimento() {
         return vencimento;
