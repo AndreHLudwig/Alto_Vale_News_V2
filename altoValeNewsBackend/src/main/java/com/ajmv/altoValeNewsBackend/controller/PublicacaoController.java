@@ -1,7 +1,6 @@
 package com.ajmv.altoValeNewsBackend.controller;
 
-import com.ajmv.altoValeNewsBackend.model.Categoria;
-import com.ajmv.altoValeNewsBackend.model.Publicacao;
+import com.ajmv.altoValeNewsBackend.model.*;
 import com.ajmv.altoValeNewsBackend.repository.PublicacaoRepository;
 import com.ajmv.altoValeNewsBackend.service.PublicacaoService;
 import org.json.JSONObject;
@@ -25,35 +24,25 @@ import java.util.logging.Logger;
 @RequestMapping("publicacao")
 public class PublicacaoController {
 
-    @Autowired
-    private PublicacaoRepository publicacaoRepository;
-
-    @Autowired
-    private PublicacaoService publicacaoService;
+    private final PublicacaoRepository publicacaoRepository;
+    private final PublicacaoService publicacaoService;
 
     private static final Logger LOGGER = Logger.getLogger(PublicacaoController.class.getName());
 
+    @Autowired
+    public PublicacaoController(PublicacaoRepository publicacaoRepository, PublicacaoService publicacaoService) {
+        this.publicacaoRepository = publicacaoRepository;
+        this.publicacaoService = publicacaoService;
+    }
+
     @GetMapping
     public List<Publicacao> getAll() {
-        try {
-            return publicacaoService.getAll();
-        } catch (SQLException e) {
-            LOGGER.severe("SQLException while retrieving publicacoes: " + e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao recuperar publicações", e);
-        }
+        return publicacaoService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Publicacao> getPublicacao(@PathVariable Integer id) {
-        try {
-            Publicacao publicacao = publicacaoService.getPublicacao(id);
-            if (publicacao == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(publicacao);
-        } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<Publicacao> getById(@PathVariable Integer id) {
+        return publicacaoService.getPublicacao(id);
     }
 
     @PostMapping
@@ -65,10 +54,10 @@ public class PublicacaoController {
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,
             @RequestParam("categorias") List<Categoria> categorias,
-            @RequestParam("visibilidadeVip") Boolean visibilidadeVip/*,
-            @RequestParam("curtidas") Integer curtidas*/) {
+            @RequestParam("visibilidadeVip") Boolean visibilidadeVip,
+            @RequestParam("curtidas") List<Curtida> curtidas) {
         try {
-            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categorias, visibilidadeVip /*, curtidas*/);
+            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categorias, visibilidadeVip, curtidas);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while saving publicacao: " + e.getMessage());
@@ -147,29 +136,13 @@ public class PublicacaoController {
         }
     }
 
-    @PatchMapping("/{id}/like")
-    public ResponseEntity<Publicacao> likePublicacao(@PathVariable Integer id) {
-        try {
-            //TODO - refazer a lógica Service, verificando se o usuário já curtiu
-            Publicacao publicacao = publicacaoService.likePublicacao(id);
-            return ResponseEntity.ok(publicacao);
-        } catch (IllegalArgumentException e) {
-            LOGGER.warning("IllegalArgumentException: " + e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Publicacao> likePublicacao(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
+        return publicacaoService.like(id, usuarioLogado);
     }
 
-    @PatchMapping("/{id}/dislike")
-    public ResponseEntity<Publicacao> dislikePublicacao(@PathVariable Integer id) {
-        try {
-            //TODO - refazer a lógica no Service, verificando se o usuário já descurtiu
-            Publicacao publicacao = publicacaoService.dislikePublicacao(id);
-            return ResponseEntity.ok(publicacao);
-        } catch (IllegalArgumentException | SQLException e) {
-            LOGGER.warning("IllegalArgumentException: " + e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        }
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Publicacao> unlikePublicacao(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
+        return publicacaoService.unlike(id, usuarioLogado);
     }
 }

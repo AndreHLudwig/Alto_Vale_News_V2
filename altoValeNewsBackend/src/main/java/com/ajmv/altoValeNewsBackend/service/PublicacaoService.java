@@ -2,11 +2,14 @@ package com.ajmv.altoValeNewsBackend.service;
 
 import com.ajmv.altoValeNewsBackend.model.*;
 import com.ajmv.altoValeNewsBackend.repository.CategoriaRepository;
+import com.ajmv.altoValeNewsBackend.repository.CurtidaRepository;
 import com.ajmv.altoValeNewsBackend.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Service;
@@ -25,128 +28,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-//TODO - Verificar necessidade de um service ou se o Repository tem capacidade para nos atender
-
 @Service
 public class PublicacaoService {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    private PublicacaoRepository publicacaoRepository;
-    private CategoriaRepository categoriaRepository;
-    private UsuarioRepository editorRepository;
-    private MediaFileService fileService;
-    private ComentarioService comentarioService;
+    private final PublicacaoRepository publicacaoRepository;
+    private final CategoriaRepository categoriaRepository;
+    private final UsuarioRepository editorRepository;
+    private final MediaFileService fileService;
+    private final ComentarioService comentarioService;
+    private final CurtidaRepository curtidaRepository;
 
     @Autowired
-    public PublicacaoService(PublicacaoRepository publicacaoRepository, CategoriaRepository categoriaRepository, UsuarioRepository editorRepository, MediaFileService fileService) {
-
+    public PublicacaoService(PublicacaoRepository publicacaoRepository, CategoriaRepository categoriaRepository, UsuarioRepository editorRepository, MediaFileService fileService, ComentarioService comentarioService, CurtidaRepository curtidaRepository) {
+        this.publicacaoRepository = publicacaoRepository;
+        this.categoriaRepository = categoriaRepository;
+        this.editorRepository = editorRepository;
+        this.fileService = fileService;
+        this.comentarioService = comentarioService;
+        this.curtidaRepository = curtidaRepository;
     }
 
     private static final Logger LOGGER = Logger.getLogger(PublicacaoService.class.getName());
 
-    public List<Publicacao> getAll() throws SQLException {
-        //TODO
-//        String sql = "SELECT p.publicacao_id, p.editor_id, p.titulo, p.data, p.texto, p.categoria, " +
-//                "p.visibilidade_vip, p.curtidas, p.imagem_id, p.video_id " +
-//                "FROM publicacao p " +
-//                "order by p.publicacao_id desc";
-//
-//        List<Publicacao> publicacoes = new ArrayList<Publicacao>();
-//
-//        try (Connection conn = jdbcTemplate.getDataSource().getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql);
-//             ResultSet rs = pstmt.executeQuery()) {
-//
-//            while (rs.next()) {
-//                Publicacao publicacao = new Publicacao();
-//                publicacao.setPublicacaoId(rs.getInt("publicacao_id"));
-//                publicacao.setTitulo(rs.getString("titulo"));
-//                publicacao.setData(rs.getObject("data", LocalDate.class));
-//                publicacao.setTexto(rs.getString("texto"));
-//                publicacao.setCategoria(rs.getString("categoria"));
-//                publicacao.setVisibilidadeVip(rs.getBoolean("visibilidade_vip"));
-//                publicacao.setCurtidas(rs.getInt("curtidas"));
-//
-//                Integer editorId = rs.getInt("editor_id");
-//                if (!rs.wasNull()) {
-//                    Editor editor = editorService.getEditor(editorId);
-//                    publicacao.setEditor(editor);
-//                }
-//
-//                Long imagemId = rs.getLong("imagem_id");
-//                if (!rs.wasNull()) {
-//                    MediaFile imagem = fileService.getFile(imagemId);
-//                    publicacao.setImagem(imagem);
-//                }
-//
-//                Long videoId = rs.getLong("video_id");
-//                if (!rs.wasNull()) {
-//                    MediaFile video = fileService.getFile(videoId);
-//                    publicacao.setVideo(video);
-//                }
-//
-//                List<Comentario> comentarios = comentarioService.getComentariosByPublicacao_id(publicacao.getPublicacaoId());
-//                publicacao.setComentarios(comentarios);
-//
-//                publicacoes.add(publicacao);
-//            }
-//        }
-
-        return null;
+    public List<Publicacao> getAll() {
+        return publicacaoRepository.findAll();
     }
 
-    public Publicacao getPublicacao(Integer publicacaoId) throws SQLException {
-        //TODO
-//        String sql = "SELECT p.publicacao_id, p.editor_id, p.titulo, p.data, p.texto, p.categoria, " +
-//                "p.visibilidade_vip, p.curtidas, p.imagem_id, p.video_id " +
-//                "FROM publicacao p " +
-//                "WHERE p.publicacao_id = ?";
-//
-//        try (Connection conn = jdbcTemplate.getDataSource().getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//
-//            pstmt.setInt(1, publicacaoId);
-//
-//            try (ResultSet rs = pstmt.executeQuery()) {
-//                if (rs.next()) {
-//                    Publicacao publicacao = new Publicacao();
-//                    publicacao.setPublicacaoId(rs.getInt("publicacao_id"));
-//                    publicacao.setTitulo(rs.getString("titulo"));
-//                    publicacao.setData(rs.getObject("data", LocalDate.class));
-//                    publicacao.setTexto(rs.getString("texto"));
-//                    publicacao.setCategoria(rs.getString("categoria"));
-//                    publicacao.setVisibilidadeVip(rs.getBoolean("visibilidade_vip"));
-//                    publicacao.setCurtidas(rs.getInt("curtidas"));
-//
-//                    Integer editorId = rs.getInt("editor_id");
-//                    if (editorId != null) {
-//                        Editor editor = editorService.getEditor(editorId);
-//                        publicacao.setEditor(editor);
-//                    }
-//
-//                    Long imagemId = rs.getLong("imagem_id");
-//                    if (imagemId != null) {
-//                        MediaFile imagem = fileService.getFile(imagemId);
-//                        publicacao.setImagem(imagem);
-//                    }
-//
-//                    Long videoId = rs.getLong("video_id");
-//                    if (videoId != null) {
-//                        MediaFile video = fileService.getFile(videoId);
-//                        publicacao.setVideo(video);
-//                    }
-//
-//                    List<Comentario> comentarios = comentarioService.getComentariosByPublicacao_id(publicacao.getPublicacaoId());
-//                    publicacao.setComentarios(comentarios);
-//
-//                    return publicacao;
-//                } else {
-//                    return null;
-//                }
-//            }
-//        }
-        return null;
+    public ResponseEntity<Publicacao> getPublicacao(Integer id) {
+        Optional<Publicacao> publicacao = publicacaoRepository.findById(id);
+        return publicacao.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /* Ao inserir publicações com mídia o problema anterior não acontece diretamente,
@@ -154,7 +64,7 @@ public class PublicacaoService {
     @Transactional
     public Publicacao savePublicacao(Integer editorId, String titulo, LocalDate data, String texto,
                                      MultipartFile imageFile, MultipartFile videoFile,
-                                     List<Categoria> categorias, Boolean visibilidadeVip /*, Integer curtidas*/) throws IOException, SQLException {
+                                     List<Categoria> categorias, Boolean visibilidadeVip, List<Curtida> curtidas) throws IOException, SQLException {
         //TODO
 //        Editor editor = editorRepository.findById(editorId)
 //                .orElseThrow(() -> new IllegalArgumentException("Editor não encontrado: " + editorId));
@@ -281,33 +191,55 @@ public class PublicacaoService {
         return publicacaoRepository.save(publicacao);
     }
 
-    public Publicacao likePublicacao(Integer id) throws SQLException {
-//        String sql = "UPDATE publicacao SET curtidas = curtidas + 1 WHERE publicacao_id = ?";
-//        jdbcTemplate.update(new PreparedStatementCreator() {
-//            @Override
-//            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-//                PreparedStatement ps = connection.prepareStatement(sql);
-//                ps.setInt(1, id);
-//                return ps;
-//            }
-//        });
-//
-//        return getPublicacao(id);
-        return null;
+    public ResponseEntity<Publicacao> like(Integer id, Usuario usuarioLogado) {
+        try {
+            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(id);
+            if (publicacaoOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Publicacao publicacao = publicacaoOptional.get();
+
+            Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuarioLogado);
+            if (curtidaOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(publicacao);
+            }
+
+            Curtida curtida = new Curtida();
+            curtida.setPublicacao(publicacao);
+            curtida.setUsuario(usuarioLogado);
+            curtidaRepository.save(curtida);
+
+            return ResponseEntity.ok(publicacao);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    public Publicacao dislikePublicacao(Integer id) throws SQLException {
-//        String sql = "UPDATE publicacao SET curtidas = curtidas - 1 WHERE publicacao_id = ?";
-//        jdbcTemplate.update(new PreparedStatementCreator() {
-//            @Override
-//            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-//                PreparedStatement ps = connection.prepareStatement(sql);
-//                ps.setInt(1, id);
-//                return ps;
-//            }
-//        });
-//
-//        return getPublicacao(id);
-        return null;
+    public ResponseEntity<Publicacao> unlike(Integer id, Usuario usuarioLogado) {
+        try {
+            // Busca publicaçao a ter seu like deletado
+            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(id);
+            if (publicacaoOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Publicacao publicacao = publicacaoOptional.get();
+
+            // Encontra a curtida pela publicação e usuário logado
+            Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuarioLogado);
+            if (curtidaOptional.isPresent()) {
+                curtidaRepository.delete(curtidaOptional.get());
+                return ResponseEntity.ok(publicacao);
+            }
+
+            // Último fallback em caso de conflito -- como um usuário tentando descurtir uma curtida que não é sua
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(publicacao);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
