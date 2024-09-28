@@ -132,7 +132,7 @@ public class UsuarioController {
 
                 /*
                 TODO - Verificar com o Farah para onde mover esse código
-                TODO - Criar um endpoint específico para gerenciar 1- alteração de tipos para administrador; e 2- gerenciar assinaturas
+                TODO - Criar um endpoint específico para gerenciar 1- alteração de tipos para administrador;
                 */
 
 //                if (usuarioAtualizado.getTipo() != null) {
