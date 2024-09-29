@@ -1,82 +1,96 @@
 package com.ajmv.altoValeNewsBackend.service;
 
+import com.ajmv.altoValeNewsBackend.exception.FileNotFoundException;
 import com.ajmv.altoValeNewsBackend.model.MediaFile;
 import com.ajmv.altoValeNewsBackend.repository.MediaFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.sql.SQLException;
-
-//TODO - Gravar arquivos no server e salvar usando Repository
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 public class MediaFileService {
+    private static final Logger logger = LoggerFactory.getLogger(MediaFileService.class);
 
     @Autowired
     private MediaFileRepository repository;
 
-//    @Autowired
-//    private JdbcTemplate jdbcTemplate;
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
-    @Transactional(rollbackFor = {SQLException.class, IOException.class})
-    public MediaFile saveFile(MultipartFile file) throws IOException, SQLException {
-        //TODO
-//        MediaFile mediaFile = new MediaFile();
-//        mediaFile.setFileName(file.getOriginalFilename());
-//        mediaFile.setFileType(file.getContentType());
-//        mediaFile.setData(file.getBytes());
+    public MediaFile saveFile(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Arquivo não pode ser null ou vazio");
+        }
 
-//        String sql = "INSERT INTO media_file (data, file_name, file_type) VALUES (?, ?, ?)";
-//        try (Connection conn = jdbcTemplate.getDataSource().getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-//
-//            pstmt.setBytes(1, mediaFile.getData());
-//            pstmt.setString(2, mediaFile.getFileName());
-//            pstmt.setString(3, mediaFile.getFileType());
-//
-//            int affectedRows = pstmt.executeUpdate();
-//
-//            if (affectedRows == 0) {
-//                throw new SQLException("Failed to insert file, no rows affected.");
-//            }
-//
-//            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-//                if (generatedKeys.next()) {
-//                    mediaFile.setId(generatedKeys.getLong(1));
-//                } else {
-//                    throw new SQLException("Failed to retrieve auto-generated key.");
-//                }
-//            }
-//        }
+        String fileType = getFileType(file.getContentType());
+        LocalDate today = LocalDate.now();
 
-//        return mediaFile;
-        return null;
+        Path relativePath = Path.of(fileType,
+                String.valueOf(today.getYear()),
+                String.format("%02d", today.getMonthValue()),
+                String.format("%02d", today.getDayOfMonth()));
+
+        Path uploadPath = Path.of(uploadDir).resolve(relativePath);
+        Files.createDirectories(uploadPath);
+
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileName = UUID.randomUUID().toString() + "_" + originalFilename;
+        Path filePath = uploadPath.resolve(fileName);
+
+        Files.copy(file.getInputStream(), filePath);
+
+        MediaFile mediaFile = new MediaFile();
+        mediaFile.setName(originalFilename);
+        mediaFile.setType(file.getContentType());
+        mediaFile.setPath(relativePath.resolve(fileName).toString());
+
+        return repository.save(mediaFile);
     }
 
-    public MediaFile getFile(Long id) throws SQLException {
-        //TODO
-//        String sql = "SELECT id, file_name, file_type, data FROM media_file WHERE id = ?";
-//
-//        try (Connection conn = jdbcTemplate.getDataSource().getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//
-//            pstmt.setLong(1, id);
-//            try (ResultSet rs = pstmt.executeQuery()) {
-//                if (rs.next()) {
-//                    MediaFile mediaFile = new MediaFile();
-//                    mediaFile.setId(rs.getLong("id"));
-//                    mediaFile.setFileName(rs.getString("file_name"));
-//                    mediaFile.setFileType(rs.getString("file_type"));
-//                    mediaFile.setData(rs.getBytes("data"));
-//                    return mediaFile;
-//                } else {
-//                    return null;
-//                }
-//            }
-//        }
-        return null;
+
+    public MediaFile getFile(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new FileNotFoundException("File not found with id: " + id));
+    }
+
+    public void deleteFile(Long id) throws IOException {
+        MediaFile mediaFile = repository.findById(id).orElse(null);
+        if (mediaFile != null) {
+            Path filePath = Paths.get(uploadDir, mediaFile.getPath());
+            Files.deleteIfExists(filePath);
+            repository.deleteById(id);
+        }
+    }
+
+    private String getFileType(String contentType) {
+        if (contentType == null) {
+            return "others";
+        }
+
+        contentType = contentType.toLowerCase();
+        if (contentType.startsWith("image/")) {
+            return "images";
+        } else if (contentType.startsWith("video/")) {
+            return "videos";
+        } else if (contentType.startsWith("audio/")) {
+            return "audios";
+        } else if (contentType.equals("application/pdf")) {
+            return "pdfs";
+        } else {
+            return "others";
+        }
     }
 }
