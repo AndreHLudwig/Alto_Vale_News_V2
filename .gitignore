@@ -6,8 +6,8 @@ target/
 /out/
 src/main/resources/application.properties
 # Precisamos manter o diretório /uploads através do .gitkeep vazio, porém o resto dos arquivos não deve ir para versionamento
-uploads/**
-!uploads/.gitkeep
+altoValeNewsBackend/uploads/**
+!altoValeNewsBackend/uploads/.gitkeep
 
 ### STS ###
 .apt_generated
