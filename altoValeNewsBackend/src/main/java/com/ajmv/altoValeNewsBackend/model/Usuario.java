@@ -151,4 +151,8 @@ public class Usuario {
     public void setTipo(TipoUsuario tipo) {
         this.tipo = tipo;
     }
+
+    public void setTipo(Integer tipo) {
+        this.tipo = TipoUsuario.getTipoUsuario(tipo);
+    }
 }
