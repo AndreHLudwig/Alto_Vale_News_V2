@@ -129,15 +129,6 @@ public class UsuarioService {
                     usuarioExistente.setCep(usuarioAtualizado.getCep());
                 }
 
-                /*
-                TODO - Verificar com o Farah para onde mover esse código
-                TODO - Criar um endpoint específico para gerenciar 1- alteração de tipos para administrador;
-                */
-
-//                if (usuarioAtualizado.getTipo() != null) {
-//                    usuarioExistente.setTipo(usuarioAtualizado.getTipo());
-//                }
-
                 Usuario usuarioAtualizadoSalvo = repository.save(usuarioExistente);
                 return ResponseEntity.ok(usuarioAtualizadoSalvo);
             } else {

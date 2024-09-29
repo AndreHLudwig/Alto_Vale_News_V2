@@ -62,7 +62,7 @@ public class AssinaturaService {
                 novaData = LocalDateTime.now().plusDays(dias);
                 setTipoUsuario(novaAssinatura.getAssinaturaId());
             } else {
-                // Se a assinatura estiver ativa, soma os dias à data de vencimento atual
+                // Se a assinatura estiver ativa, soma os dias à data de vencimento já estabelecida
                 novaData = assinaturaExistente.getVencimento().plusDays(dias);
             }
 

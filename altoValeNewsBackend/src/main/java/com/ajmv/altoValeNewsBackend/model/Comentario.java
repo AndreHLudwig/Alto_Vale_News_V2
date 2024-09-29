@@ -30,7 +30,7 @@ public class Comentario {
     private String texto;
 
     @OneToMany(mappedBy = "comentario", fetch = FetchType.LAZY)
-//    @Transient //FIXME Hibernate está reclamando ao tentar curtir um comentario
+
     private List<Curtida> curtidas; //= new ArrayList<>();
 
     public Integer getComentarioId() {

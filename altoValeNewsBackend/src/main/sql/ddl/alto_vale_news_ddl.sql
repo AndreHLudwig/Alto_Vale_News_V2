@@ -16,7 +16,7 @@ create table usuario
     senhahash varchar  not null,
     tipo      smallint not null
         constraint usuario_tipo_check
-            check (tipo = ANY (ARRAY [0, 1, 2, 3]))
+            check (tipo = ANY (ARRAY[0, 1, 2, 3]))
 );
 
 create table assinatura
@@ -87,10 +87,17 @@ create table curtida
     check (
         (comentario_id is not null and publicacao_id is null) or
         (comentario_id is null and publicacao_id is not null)
-    )
+        )
 );
 
 create index idx_curtida_comentario_id on curtida (comentario_id);
 create index idx_curtida_publicacao_id on curtida (publicacao_id);
 create index idx_comentario_publicacao_id on comentario (publicacao_id)
 
+CREATE TABLE log_verificacao_assinaturas
+(
+    id                      SERIAL PRIMARY KEY,
+    data_execucao           TIMESTAMP NOT NULL,
+    usuarios_atualizados    INTEGER   NOT NULL,
+    assinaturas_desativadas INTEGER   NOT NULL
+);
