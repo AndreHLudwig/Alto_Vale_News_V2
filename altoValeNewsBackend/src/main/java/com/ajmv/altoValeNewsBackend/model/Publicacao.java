@@ -1,7 +1,5 @@
 package com.ajmv.altoValeNewsBackend.model;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,18 +17,23 @@ public class Publicacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer publicacaoId;
+
     @ManyToOne
     @JoinColumn(name = "editor_id")
     private Usuario editor;
+
     private String titulo;
     private LocalDateTime data;
     private String texto;
-    @OneToOne
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "imagem_id")
     private MediaFile imagem;
-    @OneToOne
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "video_id")
     private MediaFile video;
+
     @ManyToMany
     @JoinTable(
             name = "categoria_publicacao",
@@ -38,10 +41,13 @@ public class Publicacao {
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
     private List<Categoria> categorias;
+
     private Boolean visibilidadeVip;
-    @OneToMany(mappedBy = "publicacao")
+
+    @OneToMany(mappedBy = "publicacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Curtida> curtidas;
-    @OneToMany(mappedBy = "publicacao")
+
+    @OneToMany(mappedBy = "publicacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comentario> comentarios;
 
     public Integer getPublicacaoId() {

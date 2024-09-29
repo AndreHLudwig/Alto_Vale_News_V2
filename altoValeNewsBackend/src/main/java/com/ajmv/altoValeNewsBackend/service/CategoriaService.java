@@ -81,4 +81,15 @@ public class CategoriaService {
             return ResponseEntity.notFound().build();
         }
     }
+
+    public Categoria findOrCreateCategoria(String nome) {
+        Optional<Categoria> categoriaOptional = categoriaRepository.findByNome(nome);
+        if (categoriaOptional.isPresent()) {
+            return categoriaOptional.get();
+        } else {
+            Categoria novaCategoria = new Categoria();
+            novaCategoria.setNome(nome);
+            return categoriaRepository.save(novaCategoria);
+        }
+    }
 }

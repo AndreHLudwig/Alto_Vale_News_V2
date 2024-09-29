@@ -1,7 +1,6 @@
 package com.ajmv.altoValeNewsBackend.controller;
 
 import com.ajmv.altoValeNewsBackend.model.*;
-import com.ajmv.altoValeNewsBackend.repository.PublicacaoRepository;
 import com.ajmv.altoValeNewsBackend.service.PublicacaoService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,14 +20,12 @@ import java.util.logging.Logger;
 @RequestMapping("publicacao")
 public class PublicacaoController {
 
-    private final PublicacaoRepository publicacaoRepository;
     private final PublicacaoService publicacaoService;
 
     private static final Logger LOGGER = Logger.getLogger(PublicacaoController.class.getName());
 
     @Autowired
-    public PublicacaoController(PublicacaoRepository publicacaoRepository, PublicacaoService publicacaoService) {
-        this.publicacaoRepository = publicacaoRepository;
+    public PublicacaoController(PublicacaoService publicacaoService) {
         this.publicacaoService = publicacaoService;
     }
 
@@ -45,24 +40,20 @@ public class PublicacaoController {
     }
 
     @PostMapping
-    public ResponseEntity<Publicacao> uploadPublicacao(
+    public ResponseEntity<Publicacao> savePublicacao(
             @RequestParam("editorId") Integer editorId,
             @RequestParam("titulo") String titulo,
-            @RequestParam("data") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate data,
+            @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime data,
             @RequestParam("texto") String texto,
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile,
-            @RequestParam("categorias") List<Categoria> categorias,
-            @RequestParam("visibilidadeVip") Boolean visibilidadeVip,
-            @RequestParam("curtidas") List<Curtida> curtidas) {
+            @RequestParam("categorias") List<String> categoriasNomes,
+            @RequestParam("visibilidadeVip") Boolean visibilidadeVip) {
         try {
-            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categorias, visibilidadeVip, curtidas);
+            Publicacao publicacao = publicacaoService.savePublicacao(editorId, titulo, data, texto, imageFile, videoFile, categoriasNomes, visibilidadeVip);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while saving publicacao: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (SQLException e) {
-            LOGGER.severe("SQLException while saving publicacao: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (IllegalArgumentException e) {
             LOGGER.warning("IllegalArgumentException: " + e.getMessage());
@@ -73,17 +64,15 @@ public class PublicacaoController {
     @PutMapping("/{id}")
     public ResponseEntity<Publicacao> updatePublicacao(
             @PathVariable Integer id,
-            @RequestParam("publicacao") JSONObject publicacaoJson,
+            @RequestParam("publicacao") String publicacaoJsonString,
             @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
             @RequestParam(value = "video", required = false) MultipartFile videoFile) {
         try {
+            JSONObject publicacaoJson = new JSONObject(publicacaoJsonString);
             Publicacao publicacao = publicacaoService.updatePublicacao(id, publicacaoJson, imageFile, videoFile);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while updating publicacao: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (SQLException e) {
-            LOGGER.severe("SQLException while updating publicacao: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (IllegalArgumentException e) {
             LOGGER.warning("IllegalArgumentException: " + e.getMessage());
@@ -94,25 +83,20 @@ public class PublicacaoController {
     @PatchMapping("/{id}")
     public ResponseEntity<Publicacao> partialUpdatePublicacao(
             @PathVariable Integer id,
-            @RequestParam("editorId") Optional<Integer> editorId,
-            @RequestParam("titulo") Optional<String> titulo,
-            @RequestParam("data") @DateTimeFormat(pattern = "yyyy-MM-dd") Optional<LocalDateTime> data,
-            @RequestParam("texto") Optional<String> texto,
-            @RequestParam(value = "imagem", required = false) MultipartFile imageFile,
-            @RequestParam(value = "video", required = false) MultipartFile videoFile,
-            @RequestParam("categorias") Optional<List<Categoria>> categorias,
-            @RequestParam("visibilidadeVip") Optional<Boolean> visibilidadeVip/*,
-            @RequestParam("curtidas") Optional<Integer> curtidas*/) {
+            @RequestParam(required = false) Optional<Integer> editorId,
+            @RequestParam(required = false) Optional<String> titulo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Optional<LocalDateTime> data,
+            @RequestParam(required = false) Optional<String> texto,
+            @RequestParam(value = "imagem", required = false) Optional<MultipartFile> imageFile,
+            @RequestParam(value = "video", required = false) Optional<MultipartFile> videoFile,
+            @RequestParam(required = false) Optional<List<String>> categoriasNomes,
+            @RequestParam(required = false) Optional<Boolean> visibilidadeVip) {
         try {
-            Publicacao publicacao = publicacaoService.partialUpdatePublicacao(id, editorId.orElse(null),
-                    titulo.orElse(null), data.orElse(null), texto.orElse(null), imageFile,
-                    videoFile, categorias.orElse(null), visibilidadeVip.orElse(null)/*, curtidas.orElse(null)*/);
+            Publicacao publicacao = publicacaoService.partialUpdatePublicacao(id, editorId, titulo, data, texto,
+                    imageFile, videoFile, categoriasNomes, visibilidadeVip);
             return ResponseEntity.ok(publicacao);
         } catch (IOException e) {
             LOGGER.severe("IOException while partially updating publicacao: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (SQLException e) {
-            LOGGER.severe("SQLException while partially updating publicacao: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (IllegalArgumentException e) {
             LOGGER.warning("IllegalArgumentException: " + e.getMessage());
@@ -123,14 +107,14 @@ public class PublicacaoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePublicacao(@PathVariable Integer id) {
         try {
-            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(id);
-            if (publicacaoOptional.isPresent()) {
-                publicacaoRepository.deleteById(id);
+            boolean deleted = publicacaoService.deletePublicacao(id);
+            if (deleted) {
                 return ResponseEntity.noContent().build();
             } else {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
+            LOGGER.severe("Error deleting publicacao: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -4,9 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ajmv.altoValeNewsBackend.model.Categoria;
 
+import java.util.Optional;
+
 public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
-	// TODO
 	Categoria findByCategoriaId(Integer categoriaId);
 
-	Categoria findByNome(String nome);
+	Optional<Categoria> findByNome(String nome);
 }
