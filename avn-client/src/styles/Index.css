@@ -1,0 +1,437 @@
+/* Estilos gerais */
+* {
+  font-family: "Montserrat", sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex-grow: 1;
+  padding-bottom: 100px;
+}
+
+#root,
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Estilos para campos readonly */
+.readonly-field {
+  background-color: #f0f0f0; /* Cor de fundo para campos readonly */
+  border: 1px solid #ccc; /* Borda para campos readonly */
+  color: #666; /* Cor do texto para campos readonly */
+}
+
+/* Estilos para campos editáveis */
+.editable-field {
+  background-color: #fff; /* Cor de fundo para campos editáveis */
+  border: 1px solid #ccc; /* Borda para campos editáveis */
+}
+
+/* Navbar */
+.navbar-brand img {
+  width: 90px;
+  height: 90px;
+}
+
+.bg-custom {
+  background-color: #80f463;
+}
+
+/* Home */
+#title-container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+#title-container h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+#title-container p {
+  margin-top: 5px;
+  color: #666;
+}
+
+#posts-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  text-align: justify;
+}
+
+.post-box {
+  flex-basis: calc(33.33% - 20px);
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.post-box img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.post-box .post-title {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+.post-box .post-title a {
+  color: #000;
+  transition: 0.5s;
+  text-decoration: none;
+}
+
+.post-box .post-title a:hover {
+  color: #999;
+}
+
+/*.post-box */
+.post-description {
+  color: #535252;
+  text-align: justify;
+  padding: 5px;
+  font-style: italic;
+}
+
+#post-description {
+  padding: 20px;
+}
+
+/* Post */
+.button-container {
+  text-align: left;
+}
+
+.like-dislike-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+#post-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-top: 30px;
+  max-width: 1250px;
+  margin: 0 auto;
+  margin-bottom: 250px;
+  text-align: justify;
+}
+
+#main-title {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.post-content {
+  color: #535252;
+  text-align: justify;
+  padding: 5px;
+}
+
+.img-container img {
+  width: 100%;
+  border-radius: 5px;
+}
+
+/* Comment Box */
+#comment-box {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+#comment-text {
+  flex: 1;
+  flex-basis: 100%;
+  min-width: 200px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+#comment-box button {
+  min-width: 100px;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#comment-box button:hover {
+  background-color: #45a049;
+}
+
+/* Comments */
+#comments-container {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
+}
+
+#comments-title {
+  font-size: 24px;
+  margin-bottom: 10px;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-weight: 300;
+  border-radius: 5px;
+}
+
+#comment-list {
+  list-style: none;
+  padding: 0;
+}
+
+#comment-list li {
+  margin-bottom: 20px;
+}
+
+#comment-list p {
+  margin-bottom: 5px;
+}
+
+#comment-list strong {
+  font-weight: bold;
+}
+
+/* Post Aside */
+
+#categories-title {
+  font-size: 24px;
+  margin-bottom: 10px;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-weight: 300;
+  border-radius: 5px;
+}
+
+#categories-list {
+  list-style: none;
+  padding: 0;
+}
+
+#categories-list li {
+  margin-bottom: 5px;
+}
+
+#categories-list a {
+  color: #666;
+  transition: 0.5s;
+  text-decoration: none;
+}
+
+#categories-list a:hover {
+  color: #000;
+}
+
+/* Auth */
+
+/* Edit Profile */
+#editProfileForm {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  padding: 5px;
+}
+
+/* Footer */
+footer {
+  width: 100%;
+  text-align: center;
+  background-color: #80f463;
+  color: #000000;
+  padding: 20px 0;
+  margin-top: auto;
+}
+
+/* PÁGINA DE CONTATO */
+
+body {
+  font-family: Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+.contact-page {
+  padding: 20px;
+}
+
+.contact-info,
+.contact-form,
+.map {
+  margin-bottom: 30px;
+}
+
+.contact-info h1,
+.contact-form h2,
+.map h2 {
+  margin-bottom: 20px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.info-item i {
+  margin-right: 10px;
+  color: #007bff;
+}
+
+.contact-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+#map {
+  width: 100%;
+  height: 400px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* ADMIN PANNEL */
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 2em;
+  color: #444;
+}
+
+#usuariosTable {
+  width: 80%;
+  margin: 20px auto;
+  border-collapse: collapse;
+}
+
+#usuariosTable,
+#usuariosTable th,
+#usuariosTable td {
+  border: 1px solid #ddd;
+}
+
+#usuariosTable th,
+#usuariosTable td {
+  padding: 10px;
+  text-align: center;
+}
+
+#usuariosTable th {
+  background-color: #4caf50;
+  color: white;
+}
+
+#usuariosTable tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#usuariosTable tr:hover {
+  background-color: #ddd;
+}
+
+#usuariosTable td input[type="radio"] {
+  margin: 0 0 0 25px;
+}
+
+#usuariosTable td button {
+  padding: 5px 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#usuariosTable td button:hover {
+  background-color: #45a049;
+}
