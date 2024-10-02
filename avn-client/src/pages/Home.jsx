@@ -1,58 +1,76 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { Await, Link } from "react-router-dom";
-import { listarPublicacoes } from "../services/api";
+import { Container } from "react-bootstrap";
+import { listarPublicacoes, obterMediaFile } from "../services/api";
+import ListaPublicacoes from '../components/ListaPublicacoes';
 
 function Home() {
-  const [publicacoes, setPublicacoes] = useState([]);
-  useEffect(() => {
-    carregarPublicacoes();
-  }, []);
+    const [publicacoes, setPublicacoes] = useState([]);
+    const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState(null);
 
-  const carregarPublicacoes = async () => {
-    try {
-      const response = await listarPublicacoes();
-    } catch (error) {
-      console.error("Erro ao carregar publicações!", error);
+    useEffect(() => {
+        carregarPublicacoes();
+    }, []);
+
+    const carregarPublicacoes = async () => {
+        try {
+            setCarregando(true);
+            const response = await listarPublicacoes();
+
+            const publicacoesComImagensAnexadas = await Promise.all(
+                response.data.map(async (publicacao) => {
+                    // Verifica se a publicação tem imagem a faz o request para api de mediafile
+                    if (publicacao.imagem && publicacao.imagem.id) {
+                        try {
+                            const imagemResponse = await obterMediaFile(publicacao.imagem.id);
+                            publicacao.imagemUrl = URL.createObjectURL(imagemResponse.data);
+                        } catch (error) {
+                            console.error(`Erro ao carregar imagem para publicação ${publicacao.publicacaoId}:`, error);
+                            publicacao.imagemUrl = null;
+                        }
+                    }
+                    // Depois disso, ou caso negativo ele só devolve a publicação:
+                    return publicacao;
+                })
+            );
+
+            setPublicacoes(publicacoesComImagensAnexadas);
+            setErro(null);
+        } catch (error) {
+            console.error("Erro ao carregar publicações:", error);
+            setErro("Falha ao carregar publicações. Por favor, tente novamente mais tarde.");
+        } finally {
+            setCarregando(false);
+        }
+    };
+
+    useEffect(() => {
+        return () => {
+            publicacoes.forEach(publicacao => {
+                if (publicacao.imagemUrl) {
+                    URL.revokeObjectURL(publicacao.imagemUrl);
+                }
+            });
+        };
+    }, [publicacoes]);
+
+    if (carregando) {
+        return <Container><p>Carregando publicações...</p></Container>;
     }
-  };
 
-  return (
-    <Container className="my-4">
-      <h1 className="text-center mb-4">Alto Vale News</h1>
-      <p className="lead text-center mb-5">
-        {" "}
-        Seu portal de Notícias do Alto Vale do Itajaí!
-      </p>
-      <Row>
-        {publicacoes.map((publicacao) => (
-          <Col key={publicacao.publicacaoId} md={4} className="mb-4">
-            <Card>
-              {publicacao.imagem && (
-                <Card.Img
-                  variant="top"
-                  src={publicacao.imagem}
-                  alt={publicacao.titulo}
-                />
-              )}
-              <Card.Body>
-                <Card.Title>{publicacao.titulo}</Card.Title>
-                <Card.Text>{publicacao.texto.subString(0, 100)}...</Card.Text>
-                <Link to={`/post/${publicacao.publicacaoId}`}>
-                  <Button variant="primary">Ler Mais</Button>
-                </Link>
-              </Card.Body>
-              <Card.Footer>
-                <small className="text-muted">
-                  Publicado em: {new Date(publicacao.data).toLocaleDateString()}
-                </small>
-              </Card.Footer>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </Container>
-  );
+    if (erro) {
+        return <Container><p className="text-danger">{erro}</p></Container>;
+    }
+
+    return (
+        <Container className="my-4">
+            <h1 className="text-center mb-4">Alto Vale News</h1>
+            <p className="lead text-center mb-5">
+                Seu portal de Notícias do Alto Vale do Itajaí!
+            </p>
+            <ListaPublicacoes publicacoes={publicacoes} />
+        </Container>
+    );
 }
 
 export default Home;

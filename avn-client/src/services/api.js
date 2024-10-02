@@ -63,4 +63,7 @@ export const assinar = (assinatura, dias) =>
 
 //TODO - Cancelar Assinatura
 
+// MediaFile
+export const obterMediaFile = (id) => api.get(`/api/media/files/${id}`, { responseType: 'blob' });
+
 export default api;
