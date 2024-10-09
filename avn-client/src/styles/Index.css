@@ -125,6 +125,15 @@ main {
 }
 
 /* Post */
+.card {
+  background-color: white;
+  text-align: justify;
+}
+
+.mb-4.col-md-4 {
+  overflow: hidden;
+}
+
 .button-container {
   text-align: left;
 }
