@@ -8,9 +8,10 @@ function Header() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      api.get("/usuario", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      api
+        .get("/usuario", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((response) => {
           setUsuario(response.data);
         })
@@ -23,8 +24,8 @@ function Header() {
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-light bg-custom">
-        <div className="container">
+      <nav className="navbar navbar-expand-lg navbar-light nav-custom">
+        <div className="header-container">
           <MyNavbar usuario={usuario} setUsuario={setUsuario} />
         </div>
       </nav>
