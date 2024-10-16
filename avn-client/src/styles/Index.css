@@ -53,6 +53,15 @@ main {
   height: 90px;
 }
 
+/*.login-card {*/
+/*  position: absolute;*/
+/*  top: 100%;*/
+/*  right: 0;*/
+/*  margin-top: 0.5rem;*/
+/*  z-index: 1000;*/
+/*  width: 300px;*/
+/*}*/
+
 .bg-custom {
   background-color: #80f463;
 }
@@ -275,7 +284,7 @@ main {
   color: #000;
 }
 
-/* Auth */
+/* Cadastro */
 
 /* Edit Profile */
 #editProfileForm {

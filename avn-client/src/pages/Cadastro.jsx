@@ -1,4 +1,4 @@
-function Auth() {
+function Cadastro() {
   return (
     <div className="container">
       <p className="mb-0">Auth</p>
@@ -6,4 +6,4 @@ function Auth() {
   );
 }
 
-export default Auth;
+export default Cadastro;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
@@ -152,7 +153,8 @@ public class Usuario {
         this.tipo = tipo;
     }
 
-    public void setTipo(Integer tipo) {
-        this.tipo = TipoUsuario.getTipoUsuario(tipo);
+    @JsonProperty("tipo")
+    public void setTipoFromInteger(Integer tipoCode) {
+        this.tipo = TipoUsuario.getTipoUsuario(tipoCode);
     }
 }

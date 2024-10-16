@@ -142,11 +142,14 @@ public class UsuarioService {
 
     public ResponseEntity<Usuario> setTipoUsuario(Integer id, Integer tipoUsuario, Integer adm) {
         try {
-            Usuario admOptional = usuarioRepository.findById(adm).orElseThrow(() -> new NoSuchElementException("Administrador não encontrado."));
-            Usuario usuarioOptional = usuarioRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Usuário não encontrado."));
+            Usuario admOptional = usuarioRepository.findById(adm)
+                .orElseThrow(() -> new NoSuchElementException("Administrador não encontrado."));
+            Usuario usuarioOptional = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado."));
 
             if (admOptional.getTipo() == TipoUsuario.ADMINISTRADOR) {
-                usuarioOptional.setTipo(tipoUsuario);
+                TipoUsuario novoTipo = TipoUsuario.getTipoUsuario(tipoUsuario);
+                usuarioOptional.setTipo(novoTipo);
                 Usuario usuarioAtualizadoBanco = repository.save(usuarioOptional);
                 return ResponseEntity.ok(usuarioAtualizadoBanco);
             } else {
@@ -154,10 +157,11 @@ public class UsuarioService {
             }
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
     }
 }
 

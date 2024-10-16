@@ -4,7 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Post from "./pages/Post";
-import Auth from "./pages/Auth";
+import Cadastro from "./pages/Cadastro.jsx";
 import EditarPerfil from "./pages/EditarPerfil";
 import Contato from "./pages/Contato";
 import PainelAdmin from "./pages/PainelAdmin";
@@ -19,7 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/post/:id" element={<Post />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/editar-perfil" element={<EditarPerfil />} />
             <Route path="/contato" element={<Contato />} />
             <Route path="/painel-admin" element={<PainelAdmin />} />
