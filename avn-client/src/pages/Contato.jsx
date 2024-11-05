@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import { enviarContato } from "../services/api";
 import "../styles/Index.css";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    nome: "",
     email: "",
-    message: "",
+    mensagem: "",
   });
 
   const handleInputChange = (e) => {
@@ -16,42 +17,26 @@ const ContactPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.message.trim() === "") {
+    if (formData.mensagem.trim() === "") {
       alert("Por favor, escreva algo antes de enviar a mensagem.");
       return;
     }
 
-    const data = {
-      nome: formData.name,
-      email: formData.email,
-      data: new Date().toISOString().split("T")[0],
-      message: formData.message,
-    };
-
-    fetch("http://localhost:8080/contato", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error("Erro ao enviar a mensagem!");
-      })
-      .then((data) => {
-        console.log("Mensagem enviada!:", data);
+    try {
+      const response = await enviarContato(formData);
+      if (response.status === 200) {
+        console.log("Mensagem enviada!:", response.data);
         alert("Mensagem enviada com sucesso!");
-        setFormData({ name: "", email: "", message: "" }); // Limpa o formulário
-      })
-      .catch((error) => {
-        console.error("Erro:", error);
-      });
+        setFormData({ nome: "", email: "", mensagem: "" }); // Limpa o formulário
+      }
+    } catch (error) {
+      console.error("Erro ao enviar a mensagem:", error);
+      console.log(formData);
+      alert("Erro ao enviar a mensagem!");
+    }
   };
 
   return (
@@ -79,12 +64,12 @@ const ContactPage = () => {
         <h2>Envie uma Mensagem</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Nome</label>
+            <label htmlFor="nome">Nome</label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="nome"
+              name="nome"
+              value={formData.nome}
               onChange={handleInputChange}
               required
             />
@@ -101,12 +86,12 @@ const ContactPage = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="message">Mensagem</label>
+            <label htmlFor="mensagem">Mensagem</label>
             <textarea
-              id="message"
-              name="message"
+              id="mensagem"
+              name="mensagem"
               rows="5"
-              value={formData.message}
+              value={formData.mensagem}
               onChange={handleInputChange}
               required
             />
