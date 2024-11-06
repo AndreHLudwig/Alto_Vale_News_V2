@@ -45,6 +45,10 @@ public class UsuarioController {
         return usuarioService.updateUsuario(id, usuarioAtualizado);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Usuario> partialUpdateUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioAtualizado) {
+        return usuarioService.partialUpdateUsuario(id, usuarioAtualizado);
+    }
 
     @PutMapping("/{id}/tipo")
     public ResponseEntity<Usuario> setTipoUsuario(@PathVariable Integer id, @Valid @RequestParam @Min(0) @Max(3) Integer tipoUsuario, @RequestHeader("Admin-Id") Integer adm) {
@@ -52,9 +56,5 @@ public class UsuarioController {
     }
 
 
-    @CrossOrigin
-    @PatchMapping("/{id}")
-    public ResponseEntity<Usuario> partialUpdateUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioAtualizado) {
-        return usuarioService.partialUpdateUsuario(id, usuarioAtualizado);
-    }
+
 }

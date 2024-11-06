@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
-import { Card, Form, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import api from '../services/api';
+import React, { useState } from "react";
+import { Card, Form, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import api from "../services/api";
 
 function LoginCard({ onClose, onLogin }) {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post('/usuario/login', { email, senha });
-      localStorage.setItem('token', response.data.jwt);
-      onLogin(response.data.usuario);
+      const response = await api.post("/usuario/login", { email, senha });
+      const token = response.data.jwt;
+      localStorage.setItem("token", token);
+
+      // Decodifica o token para obter o userId
+      const decodedToken = jwtDecode(token);
+      const userId = decodedToken.userId; // Acessa o userId do payload do token
+
+      // Passa o userId ao onLogin
+      onLogin({ userId, ...response.data.usuario });
       onClose();
     } catch (error) {
-      setErro('Usuário ou senha inválidos');
+      setErro("Usuário ou senha inválidos");
     }
   };
 

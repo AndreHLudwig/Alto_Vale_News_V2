@@ -32,7 +32,8 @@ export const logout = () => {
 // Usuários
 export const obterPerfilUsuario = (idUsuario) =>
   api.get(`/usuario/${idUsuario}`);
-export const atualizarPerfilUsuario = (dados) => api.patch("/usuario", dados);
+export const atualizarPerfilUsuario = (idUsuario, dados) =>
+  api.patch(`/usuario/${idUsuario}`, dados);
 
 // Publicações
 export const listarPublicacoes = () => api.get("/publicacao");
