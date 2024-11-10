@@ -47,7 +47,7 @@ public class UsuarioService {
         }
     }
 
-    public ResponseEntity<Usuario> createUsuario(Usuario novoUsuario) {
+    public ResponseEntity<?> createUsuario(Usuario novoUsuario) {
         try {
             String senhaPlana = novoUsuario.getSenha();
             novoUsuario.setSenhahash(passwordEncoder.encode(senhaPlana));
@@ -58,19 +58,24 @@ public class UsuarioService {
 
             Usuario usuarioCriado = repository.save(novoUsuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
+
         } catch (DataIntegrityViolationException e) {
             Throwable cause = e.getRootCause();
+
             if (cause instanceof PSQLException) {
                 PSQLException sqlException = (PSQLException) cause;
+
                 if (PSQLState.UNIQUE_VIOLATION.getState().equals(sqlException.getSQLState())) {
-                    throw new EmailJaCadastradoException("E-mail já cadastrado.");
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail já cadastrado.");
+
                 } else if (PSQLState.INVALID_PARAMETER_VALUE.getState().equals(sqlException.getSQLState())) {
-                    throw new CPFInvalidoException("CPF inválido.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CPF inválido.");
                 }
             }
-            throw new RuntimeException("Erro ao criar usuário.", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar usuário.");
         }
     }
+
 
     public ResponseEntity<?> deleteUsuario(Integer id) {
         try {

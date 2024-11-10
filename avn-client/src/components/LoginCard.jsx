@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../services/api";
 
+//TODO - Somente usar o Token ao invés dados expostos por exemplo a linha 26 desse Componente
+
 function LoginCard({ onClose, onLogin }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -18,7 +20,7 @@ function LoginCard({ onClose, onLogin }) {
 
       // Decodifica o token para obter o userId
       const decodedToken = jwtDecode(token);
-      const userId = decodedToken.userId; // Acessa o userId do payload do token
+      const userId = decodedToken.userId;
 
       // Passa o userId ao onLogin
       onLogin({ userId, ...response.data.usuario });
@@ -56,7 +58,9 @@ function LoginCard({ onClose, onLogin }) {
           </Button>
         </Form>
         <div className="mt-3 text-center">
-          <Link to="/cadastro">Criar nova conta</Link>
+          <Link to="/cadastro" onClick={onClose}>
+            Criar nova conta
+          </Link>
         </div>
       </Card.Body>
     </Card>

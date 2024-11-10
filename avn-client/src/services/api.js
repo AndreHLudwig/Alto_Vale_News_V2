@@ -4,7 +4,6 @@ const api = axios.create({
   baseURL: "http://localhost:8080",
 });
 
-// Interceptor para adicionar o token de autenticação a todas as requisições
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,10 +22,34 @@ api.interceptors.request.use(
 // Autenticação
 export const login = (email, senha) =>
   api.post("/usuario/login", { email, senha });
-export const registro = (dadosUsuario) => api.post("/usuario", dadosUsuario);
+export const registro = async (dadosUsuario) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/usuario",
+      dadosUsuario
+    );
+    return response.data;
+  } catch (error) {
+    let errorMessage =
+      "Erro inesperado no servidor. Tente novamente mais tarde.";
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data;
+
+      if (status === 409) {
+        errorMessage = message; // Email já cadastrado
+      } else if (status === 400) {
+        errorMessage = message; // CPF inválido
+      }
+    } else {
+      errorMessage = "Erro de conexão. Verifique sua rede.";
+    }
+    throw new Error(errorMessage);
+  }
+};
+
 export const logout = () => {
   localStorage.removeItem("token");
-  // Adicione aqui qualquer lógica adicional de logout
 };
 
 // Usuários
