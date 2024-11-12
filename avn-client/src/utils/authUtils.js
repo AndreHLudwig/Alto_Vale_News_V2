@@ -14,14 +14,13 @@ export const getUserIdFromToken = () => {
   }
 };
 
-// Função para verificar se o usuário é admin
 export const isAdmin = () => {
   const token = localStorage.getItem("token");
   if (!token) return false;
 
   try {
     const decoded = jwtDecode(token);
-    return decoded.tipo === "3";
+    return decoded.tipo === 3;
   } catch (error) {
     console.error("Erro ao verificar se o usuário é admin:", error);
     return false;
@@ -34,7 +33,7 @@ export const isEditor = () => {
 
   try {
     const decoded = jwtDecode(token);
-    return decoded.tipo === "2";
+    return decoded.tipo === 2;
   } catch (error) {
     console.error("Erro ao verificar se o usuário é editor:", error);
     return false;

@@ -1,5 +1,6 @@
 import axios from "axios";
 
+
 const api = axios.create({
   baseURL: "http://localhost:8080",
 });
@@ -17,7 +18,6 @@ api.interceptors.request.use(
   }
 );
 
-// Funções para interagir com a API
 
 // Autenticação
 export const login = (email, senha) =>
@@ -57,6 +57,17 @@ export const obterPerfilUsuario = (idUsuario) =>
   api.get(`/usuario/${idUsuario}`);
 export const atualizarPerfilUsuario = (idUsuario, dados) =>
   api.patch(`/usuario/${idUsuario}`, dados);
+export const listarUsuarios = () => api.get("/usuario");
+export const alterarTipoUsuario = (idUsuario, tipoUsuario, adminId) =>
+    api.put(`/usuario/${idUsuario}/tipo`, null, {
+      headers: {
+        "Admin-Id": adminId,
+      },
+      params: {
+        tipoUsuario: Number(tipoUsuario),
+      },
+    });
+
 
 // Publicações
 export const listarPublicacoes = () => api.get("/publicacao");
