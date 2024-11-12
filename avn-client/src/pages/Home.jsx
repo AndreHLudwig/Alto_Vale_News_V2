@@ -5,7 +5,7 @@ import ListaPublicacoes from '../components/ListaPublicacoes';
 
 function Home() {
     const [publicacoes, setPublicacoes] = useState([]);
-    const [carregando, setCarregando] = useState(true);
+    //const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState(null);
 
     useEffect(() => {
@@ -14,7 +14,7 @@ function Home() {
 
     const carregarPublicacoes = async () => {
         try {
-            setCarregando(true);
+            //setCarregando(true);
             const response = await listarPublicacoes();
 
             const publicacoesComImagensAnexadas = await Promise.all(
@@ -29,7 +29,6 @@ function Home() {
                             publicacao.imagemUrl = null;
                         }
                     }
-                    // Depois disso, ou caso negativo ele só devolve a publicação:
                     return publicacao;
                 })
             );
@@ -40,7 +39,7 @@ function Home() {
             console.error("Erro ao carregar publicações:", error);
             setErro("Falha ao carregar publicações. Por favor, tente novamente mais tarde.");
         } finally {
-            setCarregando(false);
+            //setCarregando(false);
         }
     };
 
@@ -54,9 +53,6 @@ function Home() {
         };
     }, [publicacoes]);
 
-    if (carregando) {
-        return <Container><p>Carregando publicações...</p></Container>;
-    }
 
     if (erro) {
         return <Container><p className="text-danger">{erro}</p></Container>;
