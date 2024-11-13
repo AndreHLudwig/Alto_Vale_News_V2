@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
+//TODO card de publicação de tamanho padrão para evitar espaços desnecessários na home
 function PublicacaoCard({ publicacao }) {
     return (
         <Card>

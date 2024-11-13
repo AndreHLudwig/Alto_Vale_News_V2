@@ -72,10 +72,12 @@ export const alterarTipoUsuario = (idUsuario, tipoUsuario, adminId) =>
 // Publicações
 export const listarPublicacoes = () => api.get("/publicacao");
 export const obterPublicacao = (id) => api.get(`/publicacao/${id}`);
-export const criarPublicacao = (dados) => api.post("/publicacao", dados);
 export const atualizarPublicacao = (id, dados) =>
   api.put(`/publicacao/${id}`, dados);
 export const deletarPublicacao = (id) => api.delete(`/publicacao/${id}`);
+export const criarPublicacao = (dados) => 
+  api.post("/publicacao", dados, { headers: { "Content-Type": "multipart/form-data" } });
+
 
 // Comentários
 export const listarComentarios = (publicacaoId) =>

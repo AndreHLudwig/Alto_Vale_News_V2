@@ -10,6 +10,9 @@ import {
   descurtirComentario,
 } from "../services/api";
 
+//TODO consertar like
+//TODO criar componente de caixa de comentário e card de comentários
+//TODO componente de categorias
 function Post() {
   const { id } = useParams(); // Obtem o id da publicação via URL
   const [publicacao, setPublicacao] = useState(null);
