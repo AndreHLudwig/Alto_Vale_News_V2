@@ -9,8 +9,9 @@ import {
   curtirComentario,
   descurtirComentario,
 } from "../services/api";
+import {getUserIdFromToken} from "../utils/authUtils.js";
+import LikeButton from "../components/LikeButton.jsx";
 
-//TODO consertar like
 //TODO criar componente de caixa de comentário e card de comentários
 //TODO componente de categorias
 function Post() {
@@ -18,10 +19,25 @@ function Post() {
   const [publicacao, setPublicacao] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+  const [usuarioId, setUsuarioId] = useState(null);
 
   useEffect(() => {
     carregarPublicacao();
+    getUsuarioIdFromToken();
   }, [id]);
+
+  const getUsuarioIdFromToken = async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const id = getUserIdFromToken(token);
+        setUsuarioId(id);
+      } catch (error) {
+        console.error("Erro ao decodificar o token:", error);
+        setUsuarioId(null);
+      }
+    }
+  };
 
   const carregarPublicacao = async () => {
     try {
@@ -119,23 +135,13 @@ function Post() {
       <p>{publicacao.texto}</p>
 
       {/* Área de curtidas */}
-      <div className="like-dislike-container">
-        <button
-          onClick={() => curtirPublicacao(publicacao.publicacaoId)}
-          className="btn btn-info btn-sm"
-        >
-          Curtir
-        </button>
-        <span>
-          {publicacao.curtidas ? publicacao.curtidas.length : 0} curtidas
-        </span>
-        <button
-          onClick={() => descurtirPublicacao(publicacao.publicacaoId)}
-          className="btn btn-secondary btn-sm"
-        >
-          Descurtir
-        </button>
-      </div>
+      <LikeButton
+          initialLikes={publicacao.curtidas || []}
+          onLike={() => curtirPublicacao(publicacao.publicacaoId, usuarioId)}
+          onUnlike={() => descurtirPublicacao(publicacao.publicacaoId, usuarioId)}
+          usuarioId={usuarioId}
+          likeType="publicacao"
+      />
 
       <hr />
 
@@ -159,23 +165,13 @@ function Post() {
                 </p>
                 <p>{comment.texto}</p>
 
-                <div className="like-dislike-container">
-                  <button
-                    onClick={() => curtirComentario(comment.comentarioId)}
-                    className="btn btn-info btn-sm"
-                  >
-                    Curtir
-                  </button>
-                  <span>
-                    {comment.curtidas ? comment.curtidas.length : 0} curtidas
-                  </span>
-                  <button
-                    onClick={() => descurtirComentario(comment.comentarioId)}
-                    className="btn btn-secondary btn-sm"
-                  >
-                    Descurtir
-                  </button>
-                </div>
+                <LikeButton
+                    initialLikes={comment.curtidas || []}
+                    onLike={() => curtirComentario(comment.comentarioId, usuarioId)}
+                    onUnlike={() => descurtirComentario(comment.comentarioId, usuarioId)}
+                    usuarioId={usuarioId}
+                    likeType="comentario"
+                />
               </li>
             ))}
           </ul>

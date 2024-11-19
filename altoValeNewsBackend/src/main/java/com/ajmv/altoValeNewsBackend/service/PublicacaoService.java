@@ -34,17 +34,19 @@ public class PublicacaoService {
     private final CategoriaService categoriaService;
 
     private static final Logger LOGGER = Logger.getLogger(PublicacaoService.class.getName());
+    private final UsuarioRepository usuarioRepository;
 
     @Autowired
     public PublicacaoService(PublicacaoRepository publicacaoRepository, CategoriaRepository categoriaRepository,
                              UsuarioRepository editorRepository, MediaFileService fileService,
-                             CurtidaRepository curtidaRepository, CategoriaService categoriaService) {
+                             CurtidaRepository curtidaRepository, CategoriaService categoriaService, UsuarioRepository usuarioRepository) {
         this.publicacaoRepository = publicacaoRepository;
         this.categoriaRepository = categoriaRepository;
         this.editorRepository = editorRepository;
         this.fileService = fileService;
         this.curtidaRepository = curtidaRepository;
         this.categoriaService = categoriaService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public List<Publicacao> getAll() {
@@ -231,23 +233,29 @@ public class PublicacaoService {
         return false;
     }
 
-    public ResponseEntity<Publicacao> like(Integer id, Usuario usuarioLogado) {
+    public ResponseEntity<Publicacao> like(Integer publicacaoId, Integer usuarioId) {
         try {
-            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(id);
+            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(publicacaoId);
             if (publicacaoOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            Publicacao publicacao = publicacaoOptional.get();
+            Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
+            if (usuarioOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
 
-            Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuarioLogado);
+            Publicacao publicacao = publicacaoOptional.get();
+            Usuario usuario = usuarioOptional.get();
+
+            Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuario);
             if (curtidaOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(publicacao);
             }
 
             Curtida curtida = new Curtida();
             curtida.setPublicacao(publicacao);
-            curtida.setUsuario(usuarioLogado);
+            curtida.setUsuario(usuario);
             curtidaRepository.save(curtida);
 
             return ResponseEntity.ok(publicacao);
@@ -258,18 +266,24 @@ public class PublicacaoService {
         }
     }
 
-    public ResponseEntity<Publicacao> unlike(Integer id, Usuario usuarioLogado) {
+    public ResponseEntity<Publicacao> unlike(Integer publicacaoId, Integer usuarioId) {
         try {
             // Busca publicaçao a ter seu like deletado
-            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(id);
+            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(publicacaoId);
             if (publicacaoOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
+            Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
+            if (usuarioOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
             Publicacao publicacao = publicacaoOptional.get();
+            Usuario usuario = usuarioOptional.get();
 
             // Encontra a curtida pela publicação e usuário logado
-            Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuarioLogado);
+            Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuario);
             if (curtidaOptional.isPresent()) {
                 curtidaRepository.delete(curtidaOptional.get());
                 return ResponseEntity.ok(publicacao);

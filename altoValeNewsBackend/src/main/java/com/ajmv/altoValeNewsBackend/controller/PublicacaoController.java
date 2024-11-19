@@ -119,13 +119,13 @@ public class PublicacaoController {
         }
     }
 
-    @PostMapping("/{id}/like")
-    public ResponseEntity<Publicacao> likePublicacao(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
-        return publicacaoService.like(id, usuarioLogado);
+    @PostMapping("/{publicacaoId}/like")
+    public ResponseEntity<Publicacao> likePublicacao(@PathVariable("publicacaoId") Integer publicacaoId, @RequestParam Integer usuarioId) {
+        return publicacaoService.like(publicacaoId, usuarioId);
     }
 
-    @DeleteMapping("/{id}/like")
-    public ResponseEntity<Publicacao> unlikePublicacao(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
-        return publicacaoService.unlike(id, usuarioLogado);
+    @DeleteMapping("/{publicacaoId}/like")
+    public ResponseEntity<Publicacao> unlikePublicacao(@PathVariable("publicacaoId") Integer publicacaoId, @RequestParam Integer usuarioId) {
+        return publicacaoService.unlike(publicacaoId, usuarioId);
     }
 }

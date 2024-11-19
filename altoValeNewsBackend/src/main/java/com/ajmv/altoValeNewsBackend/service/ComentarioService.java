@@ -5,6 +5,7 @@ import com.ajmv.altoValeNewsBackend.model.Curtida;
 import com.ajmv.altoValeNewsBackend.model.Usuario;
 import com.ajmv.altoValeNewsBackend.repository.ComentarioRepository;
 import com.ajmv.altoValeNewsBackend.repository.CurtidaRepository;
+import com.ajmv.altoValeNewsBackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,14 @@ public class ComentarioService {
 
     private final ComentarioRepository comentarioRepository;
     private final CurtidaRepository curtidaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Autowired
-    public ComentarioService(ComentarioRepository comentarioRepository, CurtidaRepository curtidaRepository) {
+    public ComentarioService(ComentarioRepository comentarioRepository, CurtidaRepository curtidaRepository, UsuarioRepository usuarioRepository) {
         this.comentarioRepository = comentarioRepository;
         this.curtidaRepository = curtidaRepository;
+        this.usuarioRepository = usuarioRepository;
+
     }
 
     // Buscar todos os comentários
@@ -61,23 +65,29 @@ public class ComentarioService {
         }
     }
 
-    public ResponseEntity<Comentario> like(Integer id, Usuario usuarioLogado) {
+    public ResponseEntity<Comentario> like(Integer comentarioId, Integer usuarioId) {
         try {
-            Optional<Comentario> comentarioOptional = comentarioRepository.findById(id);
+            Optional<Comentario> comentarioOptional = comentarioRepository.findById(comentarioId);
             if (comentarioOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            Comentario comentario = comentarioOptional.get();
+            Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
+            if (usuarioOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
 
-            Optional<Curtida> curtidaOptional = curtidaRepository.findByComentarioAndUsuario(comentario, usuarioLogado);
+            Comentario comentario = comentarioOptional.get();
+            Usuario usuario = usuarioOptional.get();
+
+            Optional<Curtida> curtidaOptional = curtidaRepository.findByComentarioAndUsuario(comentario, usuario);
             if (curtidaOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(comentario);
             }
 
             Curtida curtida = new Curtida();
             curtida.setComentario(comentario);
-            curtida.setUsuario(usuarioLogado);
+            curtida.setUsuario(usuario);
             curtidaRepository.save(curtida);
 
             return ResponseEntity.ok(comentario);
@@ -88,18 +98,24 @@ public class ComentarioService {
         }
     }
 
-    public ResponseEntity<Comentario> unlike(Integer id, Usuario usuarioLogado) {
+    public ResponseEntity<Comentario> unlike(Integer comentarioId, Integer usuarioId) {
         try {
             // Busca comentário a ser deletado pelo seu id
-            Optional<Comentario> comentarioOptional = comentarioRepository.findById(id);
+            Optional<Comentario> comentarioOptional = comentarioRepository.findById(comentarioId);
             if (comentarioOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
+            Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
+            if (usuarioOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
             Comentario comentario = comentarioOptional.get();
+            Usuario usuario = usuarioOptional.get();
 
             // Encontra a curtida pelo comentário e usuário logado
-            Optional<Curtida> curtidaOptional = curtidaRepository.findByComentarioAndUsuario(comentario, usuarioLogado);
+            Optional<Curtida> curtidaOptional = curtidaRepository.findByComentarioAndUsuario(comentario, usuario);
             if (curtidaOptional.isPresent()) {
                 curtidaRepository.delete(curtidaOptional.get());
                 return ResponseEntity.ok(comentario);

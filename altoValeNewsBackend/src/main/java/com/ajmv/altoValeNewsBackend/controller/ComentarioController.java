@@ -40,13 +40,13 @@ public class ComentarioController {
         return comentarioService.deleteComentario(id);
     }
 
-    @PostMapping("/{id}/like")
-    public ResponseEntity<Comentario> likeComentario(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
-        return comentarioService.like(id, usuarioLogado);
+    @PostMapping("/{comentarioId}/like")
+    public ResponseEntity<Comentario> likeComentario(@PathVariable("comentarioId") Integer comentarioId, @RequestParam Integer usuarioId) {
+        return comentarioService.like(comentarioId, usuarioId);
     }
 
-    @DeleteMapping("/{id}/like")
-    public ResponseEntity<Comentario> unlikeComentario(@PathVariable Integer id, @RequestBody Usuario usuarioLogado) {
-        return comentarioService.unlike(id, usuarioLogado);
+    @DeleteMapping("/{comentarioId}/like")
+    public ResponseEntity<Comentario> unlikeComentario(@PathVariable("comentarioId") Integer comentarioId, @RequestParam Integer usuarioId) {
+        return comentarioService.unlike(comentarioId, usuarioId);
     }
 }
