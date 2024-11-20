@@ -71,7 +71,10 @@ export const alterarTipoUsuario = (idUsuario, tipoUsuario, adminId) =>
 
 // Publicações
 export const listarPublicacoes = () => api.get("/publicacao");
-export const obterPublicacao = (id) => api.get(`/publicacao/${id}`);
+export const obterPublicacao = (id, usuarioId) =>
+    api.get(`/publicacao/${id}`, {
+        params: {usuarioId}
+    });
 export const atualizarPublicacao = (id, dados) =>
     api.put(`/publicacao/${id}`, dados);
 export const deletarPublicacao = (id) => api.delete(`/publicacao/${id}`);
@@ -80,31 +83,72 @@ export const criarPublicacao = (dados) =>
 
 
 // Comentários
-export const listarComentarios = (publicacaoId) =>
-    api.get(`/comentario?publicacaoId=${publicacaoId}`);
+export const listarComentarios = (publicacaoId, usuarioId) =>
+    api.get("/comentario", {
+        params: {
+            publicacaoId,
+            usuarioId
+        }
+    });
 export const criarComentario = (dados) => api.post("/comentario", dados);
 export const deletarComentario = (id) => api.delete(`/comentario/${id}`);
 
 // Curtidas
-export const curtirPublicacao = (publicacaoId, usuarioId) =>
-    api.post(`/publicacao/${publicacaoId}/like`, null, {
-        params: { usuarioId }
-    });
+export const curtirPublicacao = async (publicacaoId, usuarioId) => {
+    try {
+        const response = await api.post(`/publicacao/${publicacaoId}/like`, null, {
+            params: {usuarioId}
+        });
+        return response;
+    } catch (error) {
+        if (error.response?.status === 409) {
+            return error.response;
+        }
+        throw error;
+    }
+};
 
-export const descurtirPublicacao = (publicacaoId, usuarioId) =>
-    api.delete(`/publicacao/${publicacaoId}/like`, {
-        params: { usuarioId }
-    });
+export const descurtirPublicacao = async (publicacaoId, usuarioId) => {
+    try {
+        const response = await api.delete(`/publicacao/${publicacaoId}/like`, {
+            params: {usuarioId}
+        });
+        return response;
+    } catch (error) {
+        if (error.response?.status === 409) {
+            return error.response;
+        }
+        throw error;
+    }
+};
 
-export const curtirComentario = (comentarioId, usuarioId) =>
-    api.post(`/comentario/${comentarioId}/like`, null, {
-        params: { usuarioId }
-    });
+export const curtirComentario = async (comentarioId, usuarioId) => {
+    try {
+        const response = await api.post(`/comentario/${comentarioId}/like`, null, {
+            params: {usuarioId}
+        });
+        return response;
+    } catch (error) {
+        if (error.response?.status === 409) {
+            return error.response;
+        }
+        throw error;
+    }
+};
 
-export const descurtirComentario = (comentarioId, usuarioId) =>
-    api.delete(`/comentario/${comentarioId}/like`, {
-        params: { usuarioId }
-    });
+export const descurtirComentario = async (comentarioId, usuarioId) => {
+    try {
+        const response = await api.delete(`/comentario/${comentarioId}/like`, {
+            params: {usuarioId}
+        });
+        return response;
+    } catch (error) {
+        if (error.response?.status === 409) {
+            return error.response;
+        }
+        throw error;
+    }
+};
 
 // Categorias
 export const listarCategorias = () => api.get("/categoria");

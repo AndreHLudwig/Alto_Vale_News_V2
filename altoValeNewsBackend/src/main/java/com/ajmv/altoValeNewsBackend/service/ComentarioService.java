@@ -29,15 +29,36 @@ public class ComentarioService {
 
     }
 
-    // Buscar todos os comentários
-    public List<Comentario> getAllComentarios() {
-        return comentarioRepository.findAll();
+    // Buscar todos os comentários de uma publicação
+    public List<Comentario> getAllComentariosFromPublicacao(Integer publicacaoId, Integer usuarioId) {
+        List<Comentario> comentarios = publicacaoId != null
+                ? comentarioRepository.findByPublicacao_PublicacaoId(publicacaoId)
+                : comentarioRepository.findAll();
+
+        if (usuarioId != null) {
+            comentarios.forEach(comentario -> {
+                boolean isLikedByUser = comentario.getCurtidas().stream()
+                        .anyMatch(curtida -> curtida.getUsuario().getUserId().equals(usuarioId));
+                comentario.setLikedByUser(isLikedByUser);
+            });
+        }
+
+        return comentarios;
     }
 
     // Buscar comentário por ID
-    public ResponseEntity<Comentario> getComentarioById(Integer id) {
+    public ResponseEntity<Comentario> getComentario(Integer id, Integer usuarioId) {
         Optional<Comentario> comentario = comentarioRepository.findById(id);
-        return comentario.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (comentario.isPresent()) {
+            Comentario com = comentario.get();
+            if (usuarioId != null) {
+                boolean isLikedByUser = com.getCurtidas().stream()
+                        .anyMatch(curtida -> curtida.getUsuario().getUserId().equals(usuarioId));
+                com.setLikedByUser(isLikedByUser);
+            }
+            return ResponseEntity.ok(com);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     // Criar novo comentário
@@ -68,12 +89,9 @@ public class ComentarioService {
     public ResponseEntity<Comentario> like(Integer comentarioId, Integer usuarioId) {
         try {
             Optional<Comentario> comentarioOptional = comentarioRepository.findById(comentarioId);
-            if (comentarioOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
             Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
-            if (usuarioOptional.isEmpty()) {
+
+            if (comentarioOptional.isEmpty() || usuarioOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
@@ -82,6 +100,7 @@ public class ComentarioService {
 
             Optional<Curtida> curtidaOptional = curtidaRepository.findByComentarioAndUsuario(comentario, usuario);
             if (curtidaOptional.isPresent()) {
+                comentario.setLikedByUser(true);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(comentario);
             }
 
@@ -90,40 +109,39 @@ public class ComentarioService {
             curtida.setUsuario(usuario);
             curtidaRepository.save(curtida);
 
-            return ResponseEntity.ok(comentario);
+            comentario = comentarioRepository.findById(comentarioId).get();
+            comentario.setLikedByUser(true);
 
+            return ResponseEntity.ok(comentario);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     public ResponseEntity<Comentario> unlike(Integer comentarioId, Integer usuarioId) {
         try {
-            // Busca comentário a ser deletado pelo seu id
             Optional<Comentario> comentarioOptional = comentarioRepository.findById(comentarioId);
-            if (comentarioOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
             Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
-            if (usuarioOptional.isEmpty()) {
+
+            if (comentarioOptional.isEmpty() || usuarioOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
             Comentario comentario = comentarioOptional.get();
             Usuario usuario = usuarioOptional.get();
 
-            // Encontra a curtida pelo comentário e usuário logado
             Optional<Curtida> curtidaOptional = curtidaRepository.findByComentarioAndUsuario(comentario, usuario);
             if (curtidaOptional.isPresent()) {
                 curtidaRepository.delete(curtidaOptional.get());
+
+                comentario = comentarioRepository.findById(comentarioId).get();
+                comentario.setLikedByUser(false);
+
                 return ResponseEntity.ok(comentario);
             }
 
-            // Último fallback em caso de conflito -- como um usuário tentando descurtir uma curtida que não é sua
+            comentario.setLikedByUser(false);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(comentario);
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

@@ -53,9 +53,24 @@ public class PublicacaoService {
         return publicacaoRepository.findAll();
     }
 
-    public ResponseEntity<Publicacao> getPublicacao(Integer id) {
+    public ResponseEntity<Publicacao> getPublicacao(Integer id, Integer usuarioId) {
         Optional<Publicacao> publicacao = publicacaoRepository.findById(id);
-        return publicacao.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (publicacao.isPresent()) {
+            Publicacao pub = publicacao.get();
+            if (usuarioId != null) {
+                boolean isLikedByUser = pub.getCurtidas().stream()
+                        .anyMatch(curtida -> curtida.getUsuario().getUserId().equals(usuarioId));
+                pub.setLikedByUser(isLikedByUser);
+
+                pub.getComentarios().forEach(comentario -> {
+                    boolean comentarioLiked = comentario.getCurtidas().stream()
+                            .anyMatch(curtida -> curtida.getUsuario().getUserId().equals(usuarioId));
+                    comentario.setLikedByUser(comentarioLiked);
+                });
+            }
+            return ResponseEntity.ok(pub);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @Transactional
@@ -258,7 +273,8 @@ public class PublicacaoService {
             curtida.setUsuario(usuario);
             curtidaRepository.save(curtida);
 
-            return ResponseEntity.ok(publicacao);
+            Publicacao publicacaoAtualizada = publicacaoRepository.findById(publicacaoId).get();
+            return ResponseEntity.ok(publicacaoAtualizada);
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -286,7 +302,8 @@ public class PublicacaoService {
             Optional<Curtida> curtidaOptional = curtidaRepository.findByPublicacaoAndUsuario(publicacao, usuario);
             if (curtidaOptional.isPresent()) {
                 curtidaRepository.delete(curtidaOptional.get());
-                return ResponseEntity.ok(publicacao);
+                Publicacao publicacaoAtualizada = publicacaoRepository.findById(publicacaoId).get();
+                return ResponseEntity.ok(publicacaoAtualizada);
             }
 
             // Último fallback em caso de conflito -- como um usuário tentando descurtir uma curtida que não é sua

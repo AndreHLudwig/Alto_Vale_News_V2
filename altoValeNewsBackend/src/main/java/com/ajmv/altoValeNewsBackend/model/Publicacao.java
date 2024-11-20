@@ -14,28 +14,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "publicacaoId")
 public class Publicacao {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer publicacaoId;
-
-    @ManyToOne
-    @JoinColumn(name = "editor_id")
+    @ManyToOne @JoinColumn(name = "editor_id")
     private Usuario editor;
 
     private String titulo;
     private LocalDateTime data;
     private String texto;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "imagem_id")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true) @JoinColumn(name = "imagem_id")
     private MediaFile imagem;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "video_id")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true) @JoinColumn(name = "video_id")
     private MediaFile video;
 
-    @ManyToMany
-    @JoinTable(
+    @ManyToMany @JoinTable(
             name = "categoria_publicacao",
             joinColumns = @JoinColumn(name = "publicacao_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
@@ -43,12 +36,14 @@ public class Publicacao {
     private List<Categoria> categorias;
 
     private Boolean visibilidadeVip;
-
     @OneToMany(mappedBy = "publicacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Curtida> curtidas;
 
     @OneToMany(mappedBy = "publicacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comentario> comentarios;
+
+    @Transient
+    private boolean likedByUser;
 
     public Integer getPublicacaoId() {
         return publicacaoId;
@@ -136,6 +131,14 @@ public class Publicacao {
 
     public void setComentarios(List<Comentario> comentarios) {
         this.comentarios = comentarios;
+    }
+
+    public boolean isLikedByUser() {
+        return likedByUser;
+    }
+
+    public void setLikedByUser(boolean likedByUser) {
+        this.likedByUser = likedByUser;
     }
 
 }

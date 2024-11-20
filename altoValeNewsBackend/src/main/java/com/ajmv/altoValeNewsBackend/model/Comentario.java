@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 @Table(name = "comentario")
@@ -18,20 +17,19 @@ import java.util.List;
 public class Comentario {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer comentarioId;
-    @ManyToOne
-    @JoinColumn(name = "publicacao_id")
-    @JsonIgnore
+    @ManyToOne @JoinColumn(name = "publicacao_id") @JsonIgnore
     private Publicacao publicacao;
-    @ManyToOne
-    @JoinColumn(name = "user_id") // Nome da coluna que representa a chave estrangeira na tabela de Comentario
+    @ManyToOne @JoinColumn(name = "user_id")
     private Usuario usuario;
-    private Date data;
 
+    private Date data;
     private String texto;
 
     @OneToMany(mappedBy = "comentario", fetch = FetchType.LAZY)
+    private List<Curtida> curtidas;
 
-    private List<Curtida> curtidas; //= new ArrayList<>();
+    @Transient
+    private boolean likedByUser;
 
     public Integer getComentarioId() {
         return comentarioId;
@@ -81,5 +79,12 @@ public class Comentario {
         this.curtidas = curtidas;
     }
 
+    public boolean isLikedByUser() {
+        return likedByUser;
+    }
+
+    public void setLikedByUser(boolean likedByUser) {
+        this.likedByUser = likedByUser;
+    }
 }
 

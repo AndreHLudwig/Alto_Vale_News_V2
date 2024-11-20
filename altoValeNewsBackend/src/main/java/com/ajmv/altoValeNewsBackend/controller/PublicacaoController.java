@@ -35,8 +35,11 @@ public class PublicacaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Publicacao> getById(@PathVariable Integer id) {
-        return publicacaoService.getPublicacao(id);
+    public ResponseEntity<Publicacao> getById(
+            @PathVariable Integer id,
+            @RequestParam(required = false) Integer usuarioId
+    ) {
+        return publicacaoService.getPublicacao(id, usuarioId);
     }
 
     @PostMapping

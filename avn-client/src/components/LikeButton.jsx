@@ -1,34 +1,23 @@
 import React, { useState } from 'react';
-import { Heart, HeartOff } from 'lucide-react'; // Utilizando os ícones do Lucide
+import { Heart, HeartOff } from 'lucide-react';
 
-export default function LikeButton({
-                                       initialLikes = [],
-                                       onLike,
-                                       onUnlike,
-                                       usuarioId,
-                                       likeType // 'publicacao' ou 'comentario'
-                                   }) {
-    const [likes, setLikes] = useState(initialLikes);
-    const isLiked = likes.some(like => like.usuario?.userId === usuarioId);
+export default function LikeButton({ isLiked, likes = [], onLikeToggle, usuarioId }) {
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const handleLikeClick = async () => {
-        try {
-            if (!usuarioId) {
-                alert("Você precisa estar logado para curtir.");
-                return;
-            }
+        if (!usuarioId || isProcessing) return;
 
-            if (isLiked) {
-                await onUnlike();
-                setLikes(likes.filter(like => like.usuario?.userId !== usuarioId));
-            } else {
-                await onLike();
-                setLikes([...likes, { usuario: { userId: usuarioId } }]);
-            }
+        try {
+            setIsProcessing(true);
+            await onLikeToggle(isLiked);
         } catch (error) {
-            console.error(`Erro ao ${isLiked ? 'descurtir' : 'curtir'} ${likeType}:`, error);
+            // console.error(`Erro ao ${isLiked ? 'descurtir' : 'curtir'}:`, error);
+        } finally {
+            setIsProcessing(false);
         }
     };
+
+    // console.log('LikeButton render:', { isLiked, likesCount: likes.length });
 
     return (
         <div className="d-flex align-items-center gap-2">
@@ -36,6 +25,7 @@ export default function LikeButton({
                 onClick={handleLikeClick}
                 className={`btn btn-sm ${isLiked ? 'btn-danger' : 'btn-outline-danger'}`}
                 title={isLiked ? 'Descurtir' : 'Curtir'}
+                disabled={!usuarioId || isProcessing}
             >
                 {isLiked ? <HeartOff size={16} /> : <Heart size={16} />}
             </button>

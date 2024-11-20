@@ -1,7 +1,6 @@
 package com.ajmv.altoValeNewsBackend.controller;
 
 import com.ajmv.altoValeNewsBackend.model.Comentario;
-import com.ajmv.altoValeNewsBackend.model.Usuario;
 import com.ajmv.altoValeNewsBackend.service.ComentarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +20,19 @@ public class ComentarioController {
     }
 
     @GetMapping
-    public List<Comentario> getAll() {
-        return comentarioService.getAllComentarios();
+    public List<Comentario> getAll(
+            @RequestParam(required = false) Integer publicacaoId,
+            @RequestParam(required = false) Integer usuarioId
+    ) {
+        return comentarioService.getAllComentariosFromPublicacao(publicacaoId, usuarioId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Comentario> getById(@PathVariable Integer id) {
-        return comentarioService.getComentarioById(id);
+    public ResponseEntity<Comentario> getById(
+            @PathVariable Integer id,
+            @RequestParam(required = false) Integer usuarioId
+    ) {
+        return comentarioService.getComentario(id, usuarioId);
     }
 
     @PostMapping
