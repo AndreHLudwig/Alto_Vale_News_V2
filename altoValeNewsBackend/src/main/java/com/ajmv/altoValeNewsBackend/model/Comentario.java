@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Table(name = "comentario")
@@ -19,10 +19,12 @@ public class Comentario {
     private Integer comentarioId;
     @ManyToOne @JoinColumn(name = "publicacao_id") @JsonIgnore
     private Publicacao publicacao;
+    @Transient
+    private Integer publicacaoId;
     @ManyToOne @JoinColumn(name = "user_id")
     private Usuario usuario;
 
-    private Date data;
+    private LocalDate data;
     private String texto;
 
     @OneToMany(mappedBy = "comentario", fetch = FetchType.LAZY)
@@ -30,6 +32,11 @@ public class Comentario {
 
     @Transient
     private boolean likedByUser;
+
+    @PrePersist
+    protected void onCreate() {
+        this.data = LocalDate.now();
+    }
 
     public Integer getComentarioId() {
         return comentarioId;
@@ -47,6 +54,14 @@ public class Comentario {
         this.publicacao = publicacao;
     }
 
+    public Integer getPublicacaoId() {
+        return publicacao != null ? publicacao.getPublicacaoId() : publicacaoId;
+    }
+
+    public void setPublicacaoId(Integer publicacaoId) {
+        this.publicacaoId = publicacaoId;
+    }
+
     public Usuario getUsuario() {
         return usuario;
     }
@@ -55,11 +70,11 @@ public class Comentario {
         this.usuario = usuario;
     }
 
-    public Date getData() {
+    public LocalDate getData() {
         return data;
     }
 
-    public void setData(Date data) {
+    public void setData(LocalDate data) {
         this.data = data;
     }
 

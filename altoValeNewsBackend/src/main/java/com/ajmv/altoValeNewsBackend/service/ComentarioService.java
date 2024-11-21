@@ -2,15 +2,18 @@ package com.ajmv.altoValeNewsBackend.service;
 
 import com.ajmv.altoValeNewsBackend.model.Comentario;
 import com.ajmv.altoValeNewsBackend.model.Curtida;
+import com.ajmv.altoValeNewsBackend.model.Publicacao;
 import com.ajmv.altoValeNewsBackend.model.Usuario;
 import com.ajmv.altoValeNewsBackend.repository.ComentarioRepository;
 import com.ajmv.altoValeNewsBackend.repository.CurtidaRepository;
+import com.ajmv.altoValeNewsBackend.repository.PublicacaoRepository;
 import com.ajmv.altoValeNewsBackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,13 +23,14 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final CurtidaRepository curtidaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PublicacaoRepository publicacaoRepository;
 
     @Autowired
-    public ComentarioService(ComentarioRepository comentarioRepository, CurtidaRepository curtidaRepository, UsuarioRepository usuarioRepository) {
+    public ComentarioService(ComentarioRepository comentarioRepository, CurtidaRepository curtidaRepository, UsuarioRepository usuarioRepository, PublicacaoRepository publicacaoRepository) {
         this.comentarioRepository = comentarioRepository;
         this.curtidaRepository = curtidaRepository;
         this.usuarioRepository = usuarioRepository;
-
+        this.publicacaoRepository = publicacaoRepository;
     }
 
     // Buscar todos os comentários de uma publicação
@@ -64,6 +68,17 @@ public class ComentarioService {
     // Criar novo comentário
     public ResponseEntity<Comentario> createComentario(Comentario comentario) {
         try {
+            Optional<Usuario> usuarioOptional = usuarioRepository.findById(comentario.getUsuario().getUserId());
+            Optional<Publicacao> publicacaoOptional = publicacaoRepository.findById(comentario.getPublicacaoId());
+            if (publicacaoOptional.isEmpty() || usuarioOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Usuario usuario = usuarioOptional.get();
+            Publicacao publicacao = publicacaoOptional.get();
+            comentario.setUsuario(usuario);
+            comentario.setPublicacao(publicacao);
+
             Comentario comentarioCriado = comentarioRepository.save(comentario);
             return ResponseEntity.status(HttpStatus.CREATED).body(comentarioCriado);
         } catch (Exception e) {
