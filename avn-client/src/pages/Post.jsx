@@ -21,6 +21,7 @@ function Post() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [usuarioId, setUsuarioId] = useState(null);
+  const [comentariosReload, setComentariosReload] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -178,10 +179,7 @@ function Post() {
   };
 
   const atualizarComentarios = (novoComentario) => {
-    setPublicacao((prevPublicacao) => ({
-      ...prevPublicacao,
-      comentarios: [...prevPublicacao.comentarios, novoComentario],
-    }));
+    setComentariosReload((prev) => prev + 1);
   };
 
   return (
@@ -230,7 +228,11 @@ function Post() {
       {/* Renderiza os comentários */}
       <div className="row">
         <div className="col-md-10">
-          <CommentsList publicacaoId={publicacao.publicacaoId} usuarioId={usuarioId} />
+          <CommentsList
+            publicacaoId={publicacao.publicacaoId}
+            usuarioId={usuarioId}
+            shouldReload={comentariosReload}
+          />
         </div>
       </div>
     </Container>
