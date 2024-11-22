@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { registro } from "../services/api";
+import { Container, Form, Button } from "react-bootstrap";
+import { useAuth } from "../auth";
+import { useNavigate } from "react-router-dom";
 
 function Cadastro() {
-  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const { registro, error: authError } = useAuth();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,22 +24,31 @@ function Cadastro() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
 
     if (formData.senha !== formData.confirmarSenha) {
-      setErrorMessage("As senhas não correspondem.");
+      setError("As senhas não correspondem.");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.senha.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres.");
+      setLoading(false);
       return;
     }
 
     try {
-      await registro({
+      const dadosCadastro = {
         email: formData.email,
         nome: formData.nome,
         sobrenome: formData.sobrenome,
@@ -44,151 +58,169 @@ function Cadastro() {
         estado: formData.estado,
         cep: formData.cep,
         senha: formData.senha,
-      });
+      };
 
-      alert(
-        "Cadastro realizado com sucesso! Por favor, faça login para acessar sua conta."
-      );
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Erro ao registrar usuário:", error);
-      setErrorMessage(error.message);
+      await registro(dadosCadastro);
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container my-5">
-      <h2>Cadastro</h2>
-      <form onSubmit={handleSubmit}>
-        {/* Campos do formulário de cadastro */}
-        <div className="form-group">
-          <label htmlFor="email">E-mail:</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="nome">Nome:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="nome"
-            name="nome"
-            value={formData.nome}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="sobrenome">Sobrenome:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="sobrenome"
-            name="sobrenome"
-            value={formData.sobrenome}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="cpf">CPF:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="cpf"
-            name="cpf"
-            value={formData.cpf}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="endereco">Endereço:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="endereco"
-            name="endereco"
-            value={formData.endereco}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="cidade">Cidade:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="cidade"
-            name="cidade"
-            value={formData.cidade}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="estado">Estado:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="estado"
-            name="estado"
-            value={formData.estado}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="cep">CEP:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="cep"
-            name="cep"
-            value={formData.cep}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="senha">Senha:</label>
-          <input
-            type="password"
-            className="form-control"
-            id="senha"
-            name="senha"
-            value={formData.senha}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="confirmarSenha">Confirmar Senha:</label>
-          <input
-            type="password"
-            className="form-control"
-            id="confirmarSenha"
-            name="confirmarSenha"
-            value={formData.confirmarSenha}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {errorMessage && (
-          <p style={{ color: "red", fontWeight: "bold" }}>{errorMessage}</p>
-        )}
-        <button type="submit" className="btn btn-primary mt-3">
-          Registrar
-        </button>
-      </form>
-    </div>
+      <Container className="py-4">
+        <h2 className="mb-4">Cadastro</h2>
+
+        {error && <div className="alert alert-danger">{error}</div>}
+        {authError && <div className="alert alert-danger">{authError}</div>}
+
+        <Form onSubmit={handleSubmit}>
+          <div className="row">
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>CPF</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="cpf"
+                    value={formData.cpf}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Nome</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="nome"
+                    value={formData.nome}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Sobrenome</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="sobrenome"
+                    value={formData.sobrenome}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Endereço</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="endereco"
+                    value={formData.endereco}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Cidade</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="cidade"
+                    value={formData.cidade}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Estado</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="estado"
+                    value={formData.estado}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>CEP</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="cep"
+                    value={formData.cep}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Senha</Form.Label>
+                <Form.Control
+                    type="password"
+                    name="senha"
+                    value={formData.senha}
+                    onChange={handleChange}
+                    minLength={6}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Confirmar Senha</Form.Label>
+                <Form.Control
+                    type="password"
+                    name="confirmarSenha"
+                    value={formData.confirmarSenha}
+                    onChange={handleChange}
+                    minLength={6}
+                    required
+                />
+              </Form.Group>
+            </div>
+          </div>
+
+          <Button
+              variant="primary"
+              type="submit"
+              disabled={loading}
+              className="w-100"
+          >
+            {loading ? "Cadastrando..." : "Cadastrar"}
+          </Button>
+        </Form>
+      </Container>
   );
 }
 

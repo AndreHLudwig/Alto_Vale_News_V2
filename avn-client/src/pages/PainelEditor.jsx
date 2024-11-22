@@ -1,46 +1,38 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { criarPublicacao } from "../services/api"; 
-import { getUserIdFromToken, isEditor, isAdmin } from "../utils/authUtils";
+import React, { useState } from "react";
+import { Container, Form, Button } from "react-bootstrap";
+import { publicacoesAPI } from "../services/api";
+import { useAuth } from "../auth";
 
-//TODO painel para editar e excluir publicações
 const PainelEditor = () => {
-  const navigate = useNavigate();
+  const { usuario } = useAuth();
   const [form, setForm] = useState({
     titulo: "",
     texto: "",
-    categorias: [""],  
+    categorias: [""],
     visibilidadeVip: false,
     imagem: null,
     video: null,
   });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  
-  useEffect(() => {
-    if (!isEditor() && !isAdmin()) {
-      navigate("/acesso-negado"); 
-    }
-  }, [navigate]);
-
-  
   const handleInputChange = (event) => {
     const { name, value, type, checked, files, dataset } = event.target;
-    const index = dataset.index;
+    const index = dataset?.index;
+
     setForm((prevForm) => {
       if (name === "categorias") {
         const newCategories = [...prevForm.categorias];
-        newCategories[index] = value; 
+        newCategories[index] = value;
         return { ...prevForm, categorias: newCategories };
-      } else {
-        return {
-          ...prevForm,
-          [name]: type === "checkbox" ? checked : files ? files[0] : value,
-        };
       }
+      return {
+        ...prevForm,
+        [name]: type === "checkbox" ? checked : files ? files[0] : value,
+      };
     });
   };
 
- 
   const addCategoria = () => {
     setForm((prevForm) => ({
       ...prevForm,
@@ -48,7 +40,6 @@ const PainelEditor = () => {
     }));
   };
 
- 
   const removeCategoria = (index) => {
     setForm((prevForm) => {
       const newCategories = [...prevForm.categorias];
@@ -57,30 +48,28 @@ const PainelEditor = () => {
     });
   };
 
- 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const editorId = getUserIdFromToken();
-    const dataPubli = new Date().toISOString();
+    setError(null);
+    setSuccess(null);
 
     const formData = new FormData();
-    formData.append("editorId", editorId);
+    formData.append("editorId", usuario.userId);
     formData.append("titulo", form.titulo);
     formData.append("texto", form.texto);
     formData.append("visibilidadeVip", form.visibilidadeVip);
-    formData.append("data", dataPubli);
+    formData.append("data", new Date().toISOString());
     formData.append("imagem", form.imagem);
     formData.append("video", form.video);
-    
-   
+
     form.categorias.forEach((categoria) => {
       formData.append("categorias", categoria);
     });
 
     try {
-      const response = await criarPublicacao(formData);
-      if (response && response.data.publicacaoId) {
-        alert("Publicação criada com sucesso!");
+      const response = await publicacoesAPI.criar(formData);
+      if (response?.data?.publicacaoId) {
+        setSuccess("Publicação criada com sucesso!");
         setForm({
           titulo: "",
           texto: "",
@@ -89,111 +78,110 @@ const PainelEditor = () => {
           imagem: null,
           video: null,
         });
-      } else {
-        throw new Error("Erro ao criar a publicação.");
       }
     } catch (error) {
       console.error("Erro ao criar a publicação:", error);
-      alert("Erro ao criar a publicação. Verifique os campos e tente novamente.");
+      setError("Erro ao criar a publicação. Verifique os campos e tente novamente.");
     }
   };
 
   return (
-    <div className="container">
-      <h2>Criar Nova Publicação</h2>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <div className="form-group">
-          <label htmlFor="titulo">Título:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="titulo"
-            name="titulo"
-            value={form.titulo}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="texto">Texto:</label>
-          <textarea
-            className="form-control"
-            id="texto"
-            name="texto"
-            value={form.texto}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="imagem">Imagem:</label>
-          <input
-            type="file"
-            className="form-control"
-            id="imagem"
-            name="imagem"
-            accept="image/*"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="video">Vídeo:</label>
-          <input
-            type="file"
-            className="form-control"
-            id="video"
-            name="video"
-            accept="video/*"
-            onChange={handleInputChange}
-          />
-        </div>
-        {/*TODO diminuir tamanho dos campos*/}
-        <div className="form-group">
-          <label>Categorias:</label>
-          {form.categorias.map((categoria, index) => (
-            <div key={index} className="d-flex align-items-center">
-              <input
+      <Container className="py-4">
+        <h2 className="mb-4">Criar Nova Publicação</h2>
+
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
+
+        <Form onSubmit={handleSubmit} encType="multipart/form-data">
+          <Form.Group className="mb-3">
+            <Form.Label>Título</Form.Label>
+            <Form.Control
                 type="text"
-                className="form-control"
-                name="categorias"
-                value={categoria}
-                data-index={index}
+                name="titulo"
+                value={form.titulo}
                 onChange={handleInputChange}
                 required
-              />
-              <button
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Texto</Form.Label>
+            <Form.Control
+                as="textarea"
+                rows={5}
+                name="texto"
+                value={form.texto}
+                onChange={handleInputChange}
+                required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Imagem</Form.Label>
+            <Form.Control
+                type="file"
+                name="imagem"
+                accept="image/*"
+                onChange={handleInputChange}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Vídeo</Form.Label>
+            <Form.Control
+                type="file"
+                name="video"
+                accept="video/*"
+                onChange={handleInputChange}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Categorias</Form.Label>
+            {form.categorias.map((categoria, index) => (
+                <div key={index} className="d-flex gap-2 mb-2">
+                  <Form.Control
+                      type="text"
+                      name="categorias"
+                      value={categoria}
+                      data-index={index}
+                      onChange={handleInputChange}
+                      required
+                  />
+                  <Button
+                      variant="danger"
+                      onClick={() => removeCategoria(index)}
+                      disabled={form.categorias.length <= 1}
+                  >
+                    Remover
+                  </Button>
+                </div>
+            ))}
+            <Button
+                variant="secondary"
                 type="button"
-                className="btn btn-danger ml-2"
-                onClick={() => removeCategoria(index)}
-                disabled={form.categorias.length <= 1}
-              >
-                Remover
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className="btn btn-secondary mt-2"
-            onClick={addCategoria}
-          >
-            Adicionar Categoria
-          </button>
-        </div>
-        <div className="form-group">
-          <label htmlFor="visibilidadeVip">Visibilidade VIP:</label>
-          <input
-            type="checkbox"
-            id="visibilidadeVip"
-            name="visibilidadeVip"
-            checked={form.visibilidadeVip}
-            onChange={handleInputChange}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Enviar
-        </button>
-      </form>
-    </div>
+                onClick={addCategoria}
+                className="mt-2"
+            >
+              Adicionar Categoria
+            </Button>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+                type="checkbox"
+                label="Visibilidade VIP"
+                name="visibilidadeVip"
+                checked={form.visibilidadeVip}
+                onChange={handleInputChange}
+            />
+          </Form.Group>
+
+          <Button variant="primary" type="submit">
+            Publicar
+          </Button>
+        </Form>
+      </Container>
   );
 };
 

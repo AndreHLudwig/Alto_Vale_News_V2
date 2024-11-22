@@ -1,23 +1,18 @@
 import React from 'react';
+import { useAuth, authUtils } from "../auth";
 import LikeButton from './LikeButton';
-import { curtirComentario, descurtirComentario } from '../services/api';
+import { comentariosAPI } from '../services/api';
 
-export default function CommentCard({ comment, usuarioId, onUpdate, onReload }) {
+export default function CommentCard({ comment, onUpdate, onReload }) {
+    const { usuario } = useAuth();
+
     const handleComentarioLike = async (isLiked) => {
-        if (!usuarioId) return;
+        if (!usuario?.userId) return;
 
         try {
-            console.log('Estado atual antes da operação:', {
-                comentarioId: comment.comentarioId,
-                isLiked: comment.likedByUser,
-                curtidas: comment.curtidas
-            });
-
             const response = await (isLiked
-                ? descurtirComentario(comment.comentarioId, usuarioId)
-                : curtirComentario(comment.comentarioId, usuarioId));
-
-            console.log('Resposta da API:', response.data);
+                ? comentariosAPI.descurtir(comment.comentarioId, usuario.userId)
+                : comentariosAPI.curtir(comment.comentarioId, usuario.userId));
 
             if (response?.data) {
                 onUpdate({
@@ -26,29 +21,58 @@ export default function CommentCard({ comment, usuarioId, onUpdate, onReload }) 
                 });
             }
         } catch (error) {
-            console.error('Erro na operação:', error);
+            console.error('Erro ao processar curtida:', error);
             if (onReload) {
                 await onReload();
             }
         }
     };
 
+    const handleDelete = async () => {
+        if (!window.confirm('Tem certeza que deseja excluir este comentário?')) {
+            return;
+        }
+
+        try {
+            await comentariosAPI.deletar(comment.comentarioId);
+            if (onReload) {
+                await onReload();
+            }
+        } catch (error) {
+            console.error('Erro ao deletar comentário:', error);
+            alert('Erro ao deletar comentário. Tente novamente.');
+        }
+    };
+
+    const canDelete = authUtils.isContentOwner(comment.usuario.userId) || authUtils.isAdmin();
+
     return (
-        <li className="mb-4 p-3 border rounded bg-light">
-            <p>
-                <strong>Por:</strong> {comment.usuario.nome} {comment.usuario.sobrenome}
-            </p>
-            <p>
-                <strong>Data:</strong>{" "}
-                {new Date(comment.data).toLocaleDateString()}
-            </p>
-            <p>{comment.texto}</p>
+        <li className="list-group-item bg-light p-3 mb-3">
+            <div className="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <strong>{comment.usuario.nome} {comment.usuario.sobrenome}</strong>
+                    <small className="text-muted d-block">
+                        {new Date(comment.data).toLocaleDateString()}
+                    </small>
+                </div>
+                {canDelete && (
+                    <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={handleDelete}
+                        title="Excluir comentário"
+                    >
+                        <i className="fas fa-trash"></i>
+                    </button>
+                )}
+            </div>
+
+            <p className="mb-3">{comment.texto}</p>
 
             <LikeButton
                 isLiked={comment.likedByUser}
                 likes={comment.curtidas || []}
                 onLikeToggle={handleComentarioLike}
-                usuarioId={usuarioId}
+                disabled={!usuario}
             />
         </li>
     );

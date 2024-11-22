@@ -1,108 +1,103 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { Navbar, Nav, Overlay } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuth, authUtils } from "../auth";
+import { useLogin } from "../auth/LoginContext";
 import LoginCard from "./LoginCard";
-import {jwtDecode} from "jwt-decode";
-import { isAdmin, isEditor } from "../utils/authUtils";
 
+function MyNavBar() {
+    const { usuario, logout } = useAuth();
+    const { showLoginCard, openLoginCard, closeLoginCard } = useLogin();
+    const loginButtonRef = useRef(null);
 
-function MyNavBar({ usuario, setUsuario }) {
-    const [showLoginCard, setShowLoginCard] = useState(false);
-    const target = useRef(null);
-
-    const verificarUsuario = () => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setUsuario(decoded);
-            } catch (error) {
-                console.error("Erro ao decodificar o token:", error);
-                setUsuario(null);
-            }
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
         }
     };
 
-    useEffect(() => {
-        verificarUsuario(); // Chama ao carregar o componente
-    }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        setUsuario(null);
-    };
+    const isAuthenticated = authUtils.isAuthenticated();
+    const canAccessAdminPanel = authUtils.isAdmin();
+    const canAccessEditorPanel = authUtils.canEditContent();
 
     return (
         <Navbar expand="lg" className="nav-custom">
-            <Navbar.Brand as={Link} to="/">
-                <img src="/img/logo.svg" alt="Alto Vale News" height="40" />
-            </Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="ms-auto">
-                    <Nav.Link as={Link} to="/">
-                        Home
-                    </Nav.Link>
-                    {(isEditor() || isAdmin()) && (
-                        <Nav.Link as={Link} to="/painel-editor">
-                            Painel do Editor
+            <div className="container">
+                <Navbar.Brand as={Link} to="/">
+                    <img src="/img/logo.svg" alt="Alto Vale News" height="40" />
+                </Navbar.Brand>
+
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
+                <Navbar.Collapse id="basic-navbar-nav">
+                    <Nav className="ms-auto">
+                        <Nav.Link as={Link} to="/">
+                            Home
                         </Nav.Link>
-                    )}
-                    {isAdmin() && (
-                        <Nav.Link as={Link} to="/painel-admin">
-                            Painel do Admin
-                        </Nav.Link>
-                    )}
-                    <Nav.Link as={Link} to="/contato">
-                        Contato
-                    </Nav.Link>
-                    {usuario ? (
-                        <>
-                            <Nav.Link as={Link} to="/editar-perfil">
-                                <FontAwesomeIcon icon={faUser} /> Editar Perfil
+
+                        {canAccessEditorPanel && (
+                            <Nav.Link as={Link} to="/painel-editor">
+                                Painel do Editor
                             </Nav.Link>
-                            <Nav.Link onClick={handleLogout}>
-                                <FontAwesomeIcon icon={faSignOutAlt} /> Sair
+                        )}
+
+                        {canAccessAdminPanel && (
+                            <Nav.Link as={Link} to="/painel-admin">
+                                Painel do Admin
                             </Nav.Link>
-                        </>
-                    ) : (
-                        <Nav.Link
-                            ref={target}
-                            onClick={() => setShowLoginCard(!showLoginCard)}
-                        >
-                            Cadastro/Login
+                        )}
+
+                        <Nav.Link as={Link} to="/contato">
+                            Contato
                         </Nav.Link>
-                    )}
-                </Nav>
-            </Navbar.Collapse>
-            <Overlay
-                target={target.current}
-                show={showLoginCard}
-                placement="bottom-end"
-            >
-                {({ placement, arrowProps, show: _show, popper, ...props }) => (
-                    <div
-                        {...props}
-                        style={{
-                            position: "absolute",
-                            padding: "2px",
-                            borderRadius: 3,
-                            ...props.style,
-                        }}
-                    >
-                        <LoginCard
-                            onClose={() => setShowLoginCard(false)}
-                            onLogin={(user) => {
-                                setUsuario(user);
-                                setShowLoginCard(false);
+
+                        {isAuthenticated ? (
+                            <>
+                                <Nav.Link as={Link} to="/editar-perfil">
+                                    <FontAwesomeIcon icon={faUser} /> Perfil
+                                </Nav.Link>
+                                <Nav.Link onClick={handleLogout}>
+                                    <FontAwesomeIcon icon={faSignOutAlt} /> Sair
+                                </Nav.Link>
+                            </>
+                        ) : (
+                            <Nav.Link
+                                ref={loginButtonRef}
+                                onClick={() => openLoginCard()}
+                            >
+                                Cadastro/Login
+                            </Nav.Link>
+                        )}
+                    </Nav>
+                </Navbar.Collapse>
+
+                <Overlay
+                    target={loginButtonRef.current}
+                    show={showLoginCard}
+                    placement="bottom-end"
+                >
+                    {({ placement, arrowProps, show: _show, popper, ...props }) => (
+                        <div
+                            {...props}
+                            style={{
+                                position: "absolute",
+                                padding: "2px",
+                                borderRadius: 3,
+                                ...props.style,
                             }}
-                        />
-                    </div>
-                )}
-            </Overlay>
+                        >
+                            <LoginCard
+                                onClose={closeLoginCard}
+                                onLoginSuccess={closeLoginCard}
+                            />
+                        </div>
+                    )}
+                </Overlay>
+            </div>
         </Navbar>
     );
 }

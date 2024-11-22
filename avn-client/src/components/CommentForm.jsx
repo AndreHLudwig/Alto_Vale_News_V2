@@ -1,17 +1,21 @@
 import React, { useState } from "react";
-import { criarComentario } from "../services/api";
+import { Form, Button, Alert } from "react-bootstrap";
+import { comentariosAPI } from "../services/api";
+import { useAuth, authUtils } from "../auth";
 
-export default function CommentForm({ publicacaoId, usuarioId, onCommentCreated }) {
+export default function CommentForm({ publicacaoId, onCommentCreated }) {
+  const { usuario } = useAuth();
   const [comentario, setComentario] = useState("");
   const [erro, setErro] = useState(null);
   const [carregando, setCarregando] = useState(false);
 
-  const handleInputChange = (e) => {
-    setComentario(e.target.value);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!authUtils.isAuthenticated()) {
+      setErro("Você precisa estar logado para comentar.");
+      return;
+    }
 
     if (!comentario.trim()) {
       setErro("O comentário não pode estar vazio.");
@@ -22,49 +26,72 @@ export default function CommentForm({ publicacaoId, usuarioId, onCommentCreated 
     setErro(null);
 
     try {
-      const dataAtual = new Date().toISOString().split("T")[0];
-
       const payload = {
-        publicacaoId: publicacaoId,
+        publicacaoId,
         texto: comentario,
-        usuario: { userId: usuarioId },
-        data: dataAtual,
+        usuario: { userId: usuario.userId },
+        data: new Date().toISOString().split("T")[0],
       };
 
-      const response = await criarComentario(payload);
-
-      if (response.status === 201) {
-        onCommentCreated(response.data);
-        setComentario("");
-      } else {
-        setErro("Erro ao criar o comentário. Tente novamente.");
-      }
+      const response = await comentariosAPI.criar(payload);
+      onCommentCreated(response.data);
+      setComentario("");
     } catch (error) {
       console.error("Erro ao criar comentário:", error);
-      setErro("Ocorreu um erro. Tente novamente.");
+      setErro("Ocorreu um erro ao enviar o comentário. Tente novamente.");
     } finally {
       setCarregando(false);
     }
   };
 
+  if (!authUtils.isAuthenticated()) {
+    return (
+        <Alert variant="info">
+          <Alert.Heading>Faça login para comentar</Alert.Heading>
+          <p>
+            Para participar da discussão, você precisa estar logado.
+            <br />
+            <a href="/cadastro" className="alert-link">Clique aqui para fazer login ou criar uma conta</a>
+          </p>
+        </Alert>
+    );
+  }
+
   return (
-    <div className="comment-form">
-      <h4>Adicionar Comentário</h4>
-      {erro && <p className="text-danger">{erro}</p>}
-      <form onSubmit={handleSubmit}>
-        <textarea
-          value={comentario}
-          onChange={handleInputChange}
-          rows="4"
-          placeholder="Escreva seu comentário..."
-          className="form-control"
-        />
-        <div className="d-flex justify-content-between mt-2">
-          <button type="submit" className="btn btn-primary" disabled={carregando}>
-            {carregando ? "Carregando..." : "Comentar"}
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="comment-form mb-4">
+        <h4>Adicionar Comentário</h4>
+
+        {erro && (
+            <Alert variant="danger" dismissible onClose={() => setErro(null)}>
+              {erro}
+            </Alert>
+        )}
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Control
+                as="textarea"
+                rows={4}
+                value={comentario}
+                onChange={(e) => setComentario(e.target.value)}
+                placeholder="Escreva seu comentário..."
+                disabled={carregando}
+            />
+          </Form.Group>
+
+          <div className="d-flex justify-content-between align-items-center">
+            <small className="text-muted">
+              Comentando como <strong>{usuario.nome}</strong>
+            </small>
+            <Button
+                type="submit"
+                variant="primary"
+                disabled={carregando}
+            >
+              {carregando ? "Enviando..." : "Comentar"}
+            </Button>
+          </div>
+        </Form>
+      </div>
   );
 }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { obterPerfilUsuario, atualizarPerfilUsuario } from "../services/api";
-import { getUserIdFromToken } from "../utils/authUtils";
+import { Container, Form, Button } from "react-bootstrap";
+import { useAuth } from "../auth";
 
 function EditarPerfil() {
+  const { usuario, updateUserData, error: authError } = useAuth();
   const [perfil, setPerfil] = useState({
     nome: "",
     sobrenome: "",
@@ -15,60 +16,47 @@ function EditarPerfil() {
     senha: "",
     confirmarSenha: "",
   });
-
-  const [userId, setUserId] = useState(null);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
-    const fetchPerfil = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          alert("Usuário não autenticado.");
-          return;
-        }
-
-        const userIdFromToken = getUserIdFromToken(token);
-        if (!userIdFromToken) {
-          alert("ID do usuário não encontrado no token.");
-          return;
-        }
-        setUserId(userIdFromToken);
-
-        const response = await obterPerfilUsuario(userIdFromToken);
-        setPerfil({
-          ...perfil,
-          nome: response.data.nome,
-          sobrenome: response.data.sobrenome,
-          email: response.data.email,
-          cpf: response.data.cpf,
-          endereco: response.data.endereco,
-          cidade: response.data.cidade,
-          estado: response.data.estado,
-          cep: response.data.cep,
-        });
-      } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
-        alert("Erro ao carregar o perfil do usuário.");
-      }
-    };
-
-    fetchPerfil();
-  }, []);
+    if (usuario) {
+      setPerfil(prev => ({
+        ...prev,
+        nome: usuario.nome || "",
+        sobrenome: usuario.sobrenome || "",
+        email: usuario.email || "",
+        cpf: usuario.cpf || "",
+        endereco: usuario.endereco || "",
+        cidade: usuario.cidade || "",
+        estado: usuario.estado || "",
+        cep: usuario.cep || "",
+      }));
+    }
+  }, [usuario]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPerfil((prevPerfil) => ({
-      ...prevPerfil,
+    setPerfil(prev => ({
+      ...prev,
       [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
-    if (perfil.senha !== perfil.confirmarSenha) {
-      alert("As senhas não correspondem.");
-      return;
+    if (perfil.senha || perfil.confirmarSenha) {
+      if (perfil.senha !== perfil.confirmarSenha) {
+        setError("As senhas não correspondem.");
+        return;
+      }
+      if (perfil.senha.length < 6) {
+        setError("A senha deve ter pelo menos 6 caracteres.");
+        return;
+      }
     }
 
     const dadosAtualizados = {
@@ -76,158 +64,166 @@ function EditarPerfil() {
       cidade: perfil.cidade,
       estado: perfil.estado,
       cep: perfil.cep,
-      // Envia a senha apenas se estiver preenchida
-      ...(perfil.senha &&
-        perfil.senha === perfil.confirmarSenha && {
-          senha: perfil.senha,
-        }),
+      ...(perfil.senha && { senha: perfil.senha }),
     };
 
     try {
-      if (!userId) {
-        alert("Usuário não autenticado.");
-        return;
-      }
-
-      const response = await atualizarPerfilUsuario(userId, dadosAtualizados);
-      alert("Perfil atualizado com sucesso!");
-
-      if (perfil.senha) {
-        setPerfil({ ...perfil, senha: "", confirmarSenha: "" });
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
-      alert("Erro ao atualizar o perfil.");
+      await updateUserData(dadosAtualizados);
+      setSuccess("Perfil atualizado com sucesso!");
+      setPerfil(prev => ({
+        ...prev,
+        senha: "",
+        confirmarSenha: "",
+      }));
+    } catch (err) {
+      setError(err.message || "Erro ao atualizar o perfil.");
     }
   };
 
   return (
-    <div className="container my-3">
-      <h1>Editar Perfil</h1>
-      <form onSubmit={handleSubmit}>
-        {/* Campos readonly */}
-        <div className="form-group">
-          <label htmlFor="nome">Nome</label>
-          <input
-            type="text"
-            className="form-control readonly-field"
-            id="nome"
-            name="nome"
-            value={perfil.nome}
-            readOnly
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="sobrenome">Sobrenome</label>
-          <input
-            type="text"
-            className="form-control readonly-field"
-            id="sobrenome"
-            name="sobrenome"
-            value={perfil.sobrenome}
-            readOnly
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            className="form-control readonly-field"
-            id="email"
-            name="email"
-            value={perfil.email}
-            readOnly
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="cpf">CPF</label>
-          <input
-            type="text"
-            className="form-control readonly-field"
-            id="cpf"
-            name="cpf"
-            value={perfil.cpf}
-            readOnly
-          />
-        </div>
+      <Container className="py-4">
+        <h2>Editar Perfil</h2>
 
-        {/* Campos editáveis */}
-        <div className="form-group">
-          <label htmlFor="endereco">Endereço</label>
-          <input
-            type="text"
-            className="form-control editable-field"
-            id="endereco"
-            name="endereco"
-            value={perfil.endereco}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="cidade">Cidade</label>
-          <input
-            type="text"
-            className="form-control editable-field"
-            id="cidade"
-            name="cidade"
-            value={perfil.cidade}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="estado">Estado</label>
-          <input
-            type="text"
-            className="form-control editable-field"
-            id="estado"
-            name="estado"
-            value={perfil.estado}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="cep">CEP</label>
-          <input
-            type="text"
-            className="form-control editable-field"
-            id="cep"
-            name="cep"
-            value={perfil.cep}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="senha">Nova Senha</label>
-          <input
-            type="password"
-            className="form-control editable-field"
-            id="senha"
-            name="senha"
-            value={perfil.senha}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
-          <input
-            type="password"
-            className="form-control editable-field"
-            id="confirmarSenha"
-            name="confirmarSenha"
-            value={perfil.confirmarSenha}
-            onChange={handleChange}
-          />
-        </div>
+        {error && <div className="alert alert-danger">{error}</div>}
+        {authError && <div className="alert alert-danger">{authError}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-        <button type="submit" className="btn btn-primary mt-3">
-          Atualizar Perfil
-        </button>
-      </form>
-    </div>
+        <Form onSubmit={handleSubmit}>
+          <div className="row">
+            {/* Campos readonly */}
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Nome</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={perfil.nome}
+                    readOnly
+                    className="bg-light"
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Sobrenome</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={perfil.sobrenome}
+                    readOnly
+                    className="bg-light"
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                    type="email"
+                    value={perfil.email}
+                    readOnly
+                    className="bg-light"
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>CPF</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={perfil.cpf}
+                    readOnly
+                    className="bg-light"
+                />
+              </Form.Group>
+            </div>
+
+            {/* Campos editáveis */}
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Endereço</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="endereco"
+                    value={perfil.endereco}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Cidade</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="cidade"
+                    value={perfil.cidade}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Estado</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="estado"
+                    value={perfil.estado}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>CEP</Form.Label>
+                <Form.Control
+                    type="text"
+                    name="cep"
+                    value={perfil.cep}
+                    onChange={handleChange}
+                    required
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Nova Senha</Form.Label>
+                <Form.Control
+                    type="password"
+                    name="senha"
+                    value={perfil.senha}
+                    onChange={handleChange}
+                    minLength={6}
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Confirmar Nova Senha</Form.Label>
+                <Form.Control
+                    type="password"
+                    name="confirmarSenha"
+                    value={perfil.confirmarSenha}
+                    onChange={handleChange}
+                    minLength={6}
+                />
+              </Form.Group>
+            </div>
+          </div>
+
+          <Button type="submit" variant="primary">
+            Atualizar Perfil
+          </Button>
+        </Form>
+      </Container>
   );
 }
 
