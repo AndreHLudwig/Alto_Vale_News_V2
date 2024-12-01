@@ -311,3 +311,21 @@ footer {
 #usuariosTable td button:hover {
   background-color: #45a049;
 }
+
+/*Painel do Editor*/
+
+.ql-editor {
+  background-color: white;
+}
+
+.ql-toolbar {
+  background-color: white;
+  border: #333;
+}
+
+.form-control.read-only-perfil {
+  background-color: #dde6dd !important;
+  color: #495057;
+  cursor: not-allowed;
+  border-color: #b7b7b7;
+}

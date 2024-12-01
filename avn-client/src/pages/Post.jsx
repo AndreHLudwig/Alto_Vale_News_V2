@@ -6,6 +6,7 @@ import LikeButton from "../components/LikeButton";
 import CommentsList from "../components/CommentsList";
 import CommentForm from "../components/CommentForm";
 import { useAuth, authUtils } from "../auth";
+import parse from "html-react-parser";
 
 function Post() {
   const { id } = useParams();
@@ -39,8 +40,8 @@ function Post() {
           publicacaoComImagem.imagemUrl = URL.createObjectURL(imagemResponse.data);
         } catch (error) {
           console.error(
-              `Erro ao carregar imagem para a publicação ${publicacaoComImagem.publicacaoId}:`,
-              error
+            `Erro ao carregar imagem para a publicação ${publicacaoComImagem.publicacaoId}:`,
+            error
           );
           publicacaoComImagem.imagemUrl = null;
         }
@@ -61,8 +62,8 @@ function Post() {
 
     try {
       const response = await (isLiked
-          ? publicacoesAPI.descurtir(publicacao.publicacaoId, usuario.userId)
-          : publicacoesAPI.curtir(publicacao.publicacaoId, usuario.userId));
+        ? publicacoesAPI.descurtir(publicacao.publicacaoId, usuario.userId)
+        : publicacoesAPI.curtir(publicacao.publicacaoId, usuario.userId));
 
       if (response?.data) {
         setPublicacao((old) => ({
@@ -88,16 +89,16 @@ function Post() {
 
     try {
       const response = await (isLiked
-          ? comentariosAPI.descurtir(comentarioId, usuario.userId)
-          : comentariosAPI.curtir(comentarioId, usuario.userId));
+        ? comentariosAPI.descurtir(comentarioId, usuario.userId)
+        : comentariosAPI.curtir(comentarioId, usuario.userId));
 
       if (response?.status === 200 && response.data) {
         setPublicacao((old) => ({
           ...old,
           comentarios: old.comentarios.map((c) =>
-              c.comentarioId === comentarioId
-                  ? { ...c, curtidas: response.data.curtidas }
-                  : c
+            c.comentarioId === comentarioId
+              ? { ...c, curtidas: response.data.curtidas }
+              : c
           ),
         }));
       } else {
@@ -123,115 +124,115 @@ function Post() {
 
   if (carregando) {
     return (
-        <Container className="py-4">
-          <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Carregando...</span>
-            </div>
+      <Container className="py-4">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Carregando...</span>
           </div>
-        </Container>
+        </div>
+      </Container>
     );
   }
 
   if (erro) {
     if (erro === "Conteúdo exclusivo para assinantes VIP") {
       return (
-          <Container className="py-4">
-            <Alert variant="warning">
-              <Alert.Heading>Conteúdo Exclusivo VIP</Alert.Heading>
-              <p>Esta publicação está disponível apenas para assinantes VIP.</p>
-              {!authUtils.isAuthenticated() ? (
-                  <p>
-                    <a href="/cadastro" className="alert-link">Faça login</a> ou
-                    {' '}<a href="/assinar" className="alert-link">assine agora</a>
-                    {' '}para ter acesso a todo o conteúdo.
-                  </p>
-              ) : (
-                  <p>
-                    <a href="/assinar" className="alert-link">
-                      Clique aqui para atualizar sua assinatura
-                    </a>
-                  </p>
-              )}
-            </Alert>
-          </Container>
+        <Container className="py-4">
+          <Alert variant="warning">
+            <Alert.Heading>Conteúdo Exclusivo VIP</Alert.Heading>
+            <p>Esta publicação está disponível apenas para assinantes VIP.</p>
+            {!authUtils.isAuthenticated() ? (
+              <p>
+                <a href="/cadastro" className="alert-link">
+                  Faça login
+                </a>{" "}
+                ou{" "}
+                <a href="/assinar" className="alert-link">
+                  assine agora
+                </a>{" "}
+                para ter acesso a todo o conteúdo.
+              </p>
+            ) : (
+              <p>
+                <a href="/assinar" className="alert-link">
+                  Clique aqui para atualizar sua assinatura
+                </a>
+              </p>
+            )}
+          </Alert>
+        </Container>
       );
     }
 
     return (
-        <Container className="py-4">
-          <Alert variant="danger">{erro}</Alert>
-        </Container>
+      <Container className="py-4">
+        <Alert variant="danger">{erro}</Alert>
+      </Container>
     );
   }
 
   if (!publicacao) {
     return (
-        <Container className="py-4">
-          <Alert variant="info">Publicação não encontrada</Alert>
-        </Container>
+      <Container className="py-4">
+        <Alert variant="info">Publicação não encontrada</Alert>
+      </Container>
     );
   }
 
   const canEdit = authUtils.hasContentPermission(publicacao);
 
   return (
-      <Container className="py-4">
-        <div className="d-flex justify-content-between align-items-start mb-4">
-          <h1>{publicacao.titulo}</h1>
-          {canEdit && (
-              <button className="btn btn-outline-primary">
-                Editar Publicação
-              </button>
-          )}
+    <Container className="py-4">
+      <div className="d-flex justify-content-between align-items-start mb-4">
+        <h1>{publicacao.titulo}</h1>
+      </div>
+
+      <p>
+        <strong>Publicado por:</strong> {publicacao.editor.nome}{" "}
+        {publicacao.editor.sobrenome}
+      </p>
+      <p>
+        <strong>Data de Publicação:</strong>{" "}
+        {new Date(publicacao.data).toLocaleDateString()}
+      </p>
+
+      {publicacao.imagemUrl && (
+        <div className="img-container mb-4" style={{ textAlign: "center" }}>
+          <img
+            src={publicacao.imagemUrl}
+            alt={publicacao.titulo}
+            className="img-fluid rounded"
+            style={{ maxHeight: "60vh", width: "auto" }}
+          />
         </div>
+      )}
 
-        <p>
-          <strong>Publicado por:</strong> {publicacao.editor.nome}{" "}
-          {publicacao.editor.sobrenome}
-        </p>
-        <p>
-          <strong>Data de Publicação:</strong>{" "}
-          {new Date(publicacao.data).toLocaleDateString()}
-        </p>
+      <p>{parse(publicacao.texto)}</p>
 
-        {publicacao.imagemUrl && (
-            <div className="img-container mb-4" style={{ textAlign: "center" }}>
-              <img
-                  src={publicacao.imagemUrl}
-                  alt={publicacao.titulo}
-                  className="img-fluid rounded"
-                  style={{ maxHeight: "60vh", width: "auto" }}
-              />
-            </div>
-        )}
+      <LikeButton
+        isLiked={publicacao.likedByUser}
+        likes={publicacao.curtidas}
+        onLikeToggle={handlePublicacaoLike}
+        disabled={!authUtils.isAuthenticated()}
+      />
 
-        <p>{publicacao.texto}</p>
+      <hr />
 
-        <LikeButton
-            isLiked={publicacao.likedByUser}
-            likes={publicacao.curtidas}
-            onLikeToggle={handlePublicacaoLike}
-            disabled={!authUtils.isAuthenticated()}
-        />
+      <CommentForm
+        publicacaoId={publicacao.publicacaoId}
+        onCommentCreated={() => setComentariosReload((prev) => prev + 1)}
+      />
 
-        <hr />
-
-        <CommentForm
+      <div className="row">
+        <div className="col-md-10">
+          <CommentsList
             publicacaoId={publicacao.publicacaoId}
-            onCommentCreated={() => setComentariosReload(prev => prev + 1)}
-        />
-
-        <div className="row">
-          <div className="col-md-10">
-            <CommentsList
-                publicacaoId={publicacao.publicacaoId}
-                shouldReload={comentariosReload}
-                onLike={handleComentarioLike}
-            />
-          </div>
+            shouldReload={comentariosReload}
+            onLike={handleComentarioLike}
+          />
         </div>
-      </Container>
+      </div>
+    </Container>
   );
 }
 
