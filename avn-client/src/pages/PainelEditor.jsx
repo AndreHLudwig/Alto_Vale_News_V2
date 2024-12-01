@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { publicacoesAPI } from "../services/api";
 import { useAuth } from "../auth";
 
@@ -56,7 +58,7 @@ const PainelEditor = () => {
     const formData = new FormData();
     formData.append("editorId", usuario.userId);
     formData.append("titulo", form.titulo);
-    formData.append("texto", form.texto);
+    formData.append("texto", form.texto); // Agora inclui formatações HTML
     formData.append("visibilidadeVip", form.visibilidadeVip);
     formData.append("data", new Date().toISOString());
     formData.append("imagem", form.imagem);
@@ -86,102 +88,98 @@ const PainelEditor = () => {
   };
 
   return (
-      <Container className="py-4">
-        <h2 className="mb-4">Criar Nova Publicação</h2>
+    <Container className="py-4">
+      <h2 className="mb-4">Criar Nova Publicação</h2>
 
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+      {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
-        <Form onSubmit={handleSubmit} encType="multipart/form-data">
-          <Form.Group className="mb-3">
-            <Form.Label>Título</Form.Label>
-            <Form.Control
+      <Form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Form.Group className="mb-3">
+          <Form.Label>Título</Form.Label>
+          <Form.Control
+            type="text"
+            name="titulo"
+            value={form.titulo}
+            onChange={handleInputChange}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Texto</Form.Label>
+          <ReactQuill
+            value={form.texto}
+            onChange={(value) => setForm({ ...form, texto: value })}
+            theme="snow"
+            className="mb-3"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Imagem</Form.Label>
+          <Form.Control
+            type="file"
+            name="imagem"
+            accept="image/*"
+            onChange={handleInputChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Vídeo</Form.Label>
+          <Form.Control
+            type="file"
+            name="video"
+            accept="video/*"
+            onChange={handleInputChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Categorias</Form.Label>
+          {form.categorias.map((categoria, index) => (
+            <div key={index} className="d-flex gap-2 mb-2">
+              <Form.Control
                 type="text"
-                name="titulo"
-                value={form.titulo}
+                name="categorias"
+                value={categoria}
+                data-index={index}
                 onChange={handleInputChange}
                 required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Texto</Form.Label>
-            <Form.Control
-                as="textarea"
-                rows={5}
-                name="texto"
-                value={form.texto}
-                onChange={handleInputChange}
-                required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Imagem</Form.Label>
-            <Form.Control
-                type="file"
-                name="imagem"
-                accept="image/*"
-                onChange={handleInputChange}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Vídeo</Form.Label>
-            <Form.Control
-                type="file"
-                name="video"
-                accept="video/*"
-                onChange={handleInputChange}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Categorias</Form.Label>
-            {form.categorias.map((categoria, index) => (
-                <div key={index} className="d-flex gap-2 mb-2">
-                  <Form.Control
-                      type="text"
-                      name="categorias"
-                      value={categoria}
-                      data-index={index}
-                      onChange={handleInputChange}
-                      required
-                  />
-                  <Button
-                      variant="danger"
-                      onClick={() => removeCategoria(index)}
-                      disabled={form.categorias.length <= 1}
-                  >
-                    Remover
-                  </Button>
-                </div>
-            ))}
-            <Button
-                variant="secondary"
-                type="button"
-                onClick={addCategoria}
-                className="mt-2"
-            >
-              Adicionar Categoria
-            </Button>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Check
-                type="checkbox"
-                label="Visibilidade VIP"
-                name="visibilidadeVip"
-                checked={form.visibilidadeVip}
-                onChange={handleInputChange}
-            />
-          </Form.Group>
-
-          <Button variant="primary" type="submit">
-            Publicar
+              />
+              <Button
+                variant="danger"
+                onClick={() => removeCategoria(index)}
+                disabled={form.categorias.length <= 1}>
+                Remover
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={addCategoria}
+            className="mt-2">
+            Adicionar Categoria
           </Button>
-        </Form>
-      </Container>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Check
+            type="checkbox"
+            label="Visibilidade VIP"
+            name="visibilidadeVip"
+            checked={form.visibilidadeVip}
+            onChange={handleInputChange}
+          />
+        </Form.Group>
+
+        <Button variant="primary" type="submit">
+          Publicar
+        </Button>
+      </Form>
+    </Container>
   );
 };
 
