@@ -213,4 +213,9 @@ public class Usuario {
             return(false);
         }
     }
+
+    // TODO fazer lógica completa
+    private boolean isEmail(String email) {
+        return email.contains("@");
+    }
 }
