@@ -66,6 +66,12 @@ public class Publicacao {
     }
 
     public void setTitulo(String titulo) {
+        if (titulo == null || titulo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Título não pode ser vazio.");
+        }
+        if (titulo.length() < 15 || titulo.length() > 150) {
+            throw new IllegalArgumentException("Título deve ter entre 15 e 150 caracteres.");
+        }
         this.titulo = titulo;
     }
 
@@ -82,6 +88,12 @@ public class Publicacao {
     }
 
     public void setTexto(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            throw new IllegalArgumentException("Texto não pode ser vazio.");
+        }
+        if (texto.length() < 500) {
+            throw new IllegalArgumentException("Texto deve ter no mínimo 500 caracteres.");
+        }
         this.texto = texto;
     }
 
@@ -140,5 +152,11 @@ public class Publicacao {
     public void setLikedByUser(boolean likedByUser) {
         this.likedByUser = likedByUser;
     }
+
+
+
+
+
+
 
 }

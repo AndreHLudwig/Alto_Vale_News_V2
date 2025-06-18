@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/media/files")
@@ -96,9 +98,17 @@ public class MediaFileController {
         }
     }
 
-    private String sanitizeFileName(String fileName) {
-        String sanitized = fileName.replaceAll("[^\\x00-\\x7F]", "").replaceAll("\\s+", "_");
-        return URLEncoder.encode(sanitized, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+    public static String sanitizeFileName(String fileName) {
+        if (fileName == null) return "";
+
+        String normalized = Normalizer.normalize(fileName, Normalizer.Form.NFD);
+        String semAcento = Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
+                .matcher(normalized)
+                .replaceAll("");
+
+        String withUnderscores = semAcento.replaceAll("\\s+", "_");
+
+        return URLEncoder.encode(withUnderscores, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
     @DeleteMapping("/{id}")
