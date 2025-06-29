@@ -1,13 +1,12 @@
 package com.ajmv.altoValeNewsBackend.model;
 
+import java.time.LocalDateTime;
+import java.util.regex.Pattern;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.time.LocalDateTime;
-import java.util.InputMismatchException;
 
 @Table(name = "usuario")
 @Entity(name = "usuario")
@@ -23,8 +22,13 @@ public class Usuario {
 
     private String nome;
     private String sobrenome;
+
+    @Column(unique = true)
     private String email;
+
+    @Column(unique = true)
     private String cpf;
+
     private String endereco;
     private String cidade;
     private String estado;
@@ -38,7 +42,6 @@ public class Usuario {
     private Assinatura assinatura;
 
     @Transient
-    // indica ao JPA que este campo não deve ser persistido - somente usado no objeto java para fazer comparações na hora do login com o hash.
     private String senha;
 
     public Assinatura getAssinatura() {
@@ -156,42 +159,26 @@ public class Usuario {
 
     @JsonProperty("tipo")
     public void setTipoFromInteger(Integer tipoCode) {
-        this.tipo = TipoUsuario.getTipoUsuario(tipoCode);
+        if (tipoCode != null) {
+            this.tipo = TipoUsuario.getTipoUsuario(tipoCode);
+        }
     }
 
-    private boolean isCPF(String CPF) {
-        // considera-se erro CPFs formados por uma sequencia de numeros iguais
-        if (CPF.equals("00000000000") ||
-                CPF.equals("11111111111") ||
-                CPF.equals("22222222222") || CPF.equals("33333333333") ||
-                CPF.equals("44444444444") || CPF.equals("55555555555") ||
-                CPF.equals("66666666666") || CPF.equals("77777777777") ||
-                CPF.equals("88888888888") || CPF.equals("99999999999") ||
-                (CPF.length() != 11))
-            return(false);
-
-        char dig10, dig11;
-        int sm, i, r, num, peso;
-
+    protected boolean isCPF(String CPF) {
+        if (CPF == null || CPF.length() != 11 || CPF.matches(CPF.charAt(0) + "{11}")) return false;
         try {
-            // Calculo do 1o. Digito Verificador
+            char dig10, dig11;
+            int sm, i, r, num, peso;
             sm = 0;
             peso = 10;
             for (i=0; i<9; i++) {
-                // converte o i-esimo caractere do CPF em um numero:
-                // por exemplo, transforma o caractere "0" no inteiro 0
-                // (48 eh a posicao de "0" na tabela ASCII)
                 num = (int)(CPF.charAt(i) - 48);
                 sm = sm + (num * peso);
                 peso = peso - 1;
             }
-
             r = 11 - (sm % 11);
-            if ((r == 10) || (r == 11))
-                dig10 = '0';
-            else dig10 = (char)(r + 48); // converte no respectivo caractere numerico
-
-            // Calculo do 2o. Digito Verificador
+            if ((r == 10) || (r == 11)) dig10 = '0';
+            else dig10 = (char)(r + 48);
             sm = 0;
             peso = 11;
             for(i=0; i<10; i++) {
@@ -199,23 +186,33 @@ public class Usuario {
                 sm = sm + (num * peso);
                 peso = peso - 1;
             }
-
             r = 11 - (sm % 11);
-            if ((r == 10) || (r == 11))
-                dig11 = '0';
+            if ((r == 10) || (r == 11)) dig11 = '0';
             else dig11 = (char)(r + 48);
-
-            // Verifica se os digitos calculados conferem com os digitos informados.
-            if ((dig10 == CPF.charAt(9)) && (dig11 == CPF.charAt(10)))
-                return(true);
-            else return(false);
-        } catch (InputMismatchException erro) {
-            return(false);
+            return (dig10 == CPF.charAt(9)) && (dig11 == CPF.charAt(10));
+        } catch (Exception e) {
+            return false;
         }
     }
-
-    // TODO fazer lógica completa
-    private boolean isEmail(String email) {
-        return email.contains("@");
+    
+    protected boolean isEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pat = Pattern.compile(emailRegex);
+        return pat.matcher(email).matches();
+    }
+    
+    protected boolean validaCEP(String cep) {
+        if (cep == null || cep.length() != 8) {
+            return false;
+        }
+        for (char c : cep.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
