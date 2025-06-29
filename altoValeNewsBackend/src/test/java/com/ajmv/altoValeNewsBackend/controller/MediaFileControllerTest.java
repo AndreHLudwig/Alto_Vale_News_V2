@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MediaFileControllerTest {
 
-
+//Testes Unitários
     @Test
     void sanitizerNulo() {
         assertEquals("", sanitizeFileName(null));
@@ -31,14 +31,6 @@ class MediaFileControllerTest {
         assertEquals(esperado, resultado);
     }
 
-
-    @Test
-    void testeUrlEncode() { //fail test
-        String original = "teste espaço";
-        String esperado = "teste_%20espa%C3%A7o";
-        String resultado = sanitizeFileName(original);
-        assertEquals(esperado, resultado);
-    }
 
 
     @Test

@@ -6,6 +6,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PublicacaoTest {
 
+//Testes Unitários
+
+//Testes título
+    @Test
+    void setTituloValido() {
+        Publicacao pub = new Publicacao();
+        String titulo = "Título válido com mais de 15";
+        assertDoesNotThrow(() -> pub.setTitulo(titulo));
+        assertEquals(titulo, pub.getTitulo());
+    }
+
     @Test
     void setTituloNulo() {
         Publicacao pub = new Publicacao();
@@ -31,12 +42,13 @@ class PublicacaoTest {
         assertThrows(IllegalArgumentException.class, () -> pub.setTitulo(longTitulo));
     }
 
+    //Teste Texto
     @Test
-    void setTituloValido() {
+    void setTextoValido() {
         Publicacao pub = new Publicacao();
-        String titulo = "Título válido com mais de 15";
-        assertDoesNotThrow(() -> pub.setTitulo(titulo));
-        assertEquals(titulo, pub.getTitulo());
+        String textoValido = "a".repeat(500);
+        assertDoesNotThrow(() -> pub.setTexto(textoValido));
+        assertEquals(textoValido, pub.getTexto());
     }
 
     @Test
@@ -58,11 +70,25 @@ class PublicacaoTest {
         assertThrows(IllegalArgumentException.class, () -> pub.setTexto(textoCurto));
     }
 
+
+    //Teste visibilidade VIP
     @Test
-    void setTextoValido() {
-        Publicacao pub = new Publicacao();
-        String textoValido = "a".repeat(500);
-        assertDoesNotThrow(() -> pub.setTexto(textoValido));
-        assertEquals(textoValido, pub.getTexto());
+    void CT20_deveDefinirVisibilidadeVipComoTrue() {
+        Publicacao publicacao = new Publicacao();
+        publicacao.setVisibilidadeVip(true);
+
+        assertTrue(publicacao.getVisibilidadeVip());
     }
+
+    @Test
+    void deveDefinirVisibilidadeVipComoFalse() {
+        Publicacao publicacao = new Publicacao();
+        publicacao.setVisibilidadeVip(false);
+
+        assertFalse(publicacao.getVisibilidadeVip());
+    }
+
+
+
+
 }
