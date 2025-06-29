@@ -9,13 +9,13 @@ class MediaFileControllerTest {
 
 //Testes Unitários
     @Test
-    void sanitizerNulo() {
+    void ct10_sanitizerNulo() {
         assertEquals("", sanitizeFileName(null));
     }
 
 
     @Test
-    void removerCaracteresNaoAscii() {
+    void ct11_removerCaracteresNaoAscii() {
         String original = "João";
         String esperado = "Joao";
         String resultado = sanitizeFileName(original);
@@ -24,7 +24,7 @@ class MediaFileControllerTest {
 
 
     @Test
-    void trocarEspacosPorUnderscore() {
+    void ct12_trocarEspacosPorUnderscore() {
         String original = "arquivo com    espacos";
         String esperado = "arquivo_com_espacos";
         String resultado = sanitizeFileName(original);
@@ -34,7 +34,7 @@ class MediaFileControllerTest {
 
 
     @Test
-    void codificarCaracteresProibidos() {
+    void ct13_codificarCaracteresProibidos() {
         String original = "teste @#$% .formato";
         String esperado = "teste_%40%23%24%25_.formato";
         String resultado = sanitizeFileName(original);

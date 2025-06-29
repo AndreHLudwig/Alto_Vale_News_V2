@@ -10,32 +10,32 @@ class MediaFileServiceTest {
 
 
     @Test
-    void testeImageType() {
+    void ct14_testeImageType() {
         assertEquals("images", getFileType("image/jpeg"));
     }
 
     @Test
-    void testeVideoType() {
+    void ct15_testeVideoType() {
         assertEquals("videos", getFileType("video/mp4"));
     }
 
     @Test
-    void testeAudioType() {
+    void ct16_testeAudioType() {
         assertEquals("audios", getFileType("audio/mpeg"));
     }
 
     @Test
-    void testePdfType() {
+    void ct17_testePdfType() {
         assertEquals("pdfs", getFileType("application/pdf"));
     }
 
     @Test
-    void testeNullType() {
+    void ct18_testeNullType() {
         assertEquals("others", getFileType(null));
     }
 
     @Test
-    void testeDesconhecidoType() {
+    void ct19_testeDesconhecidoType() {
         assertEquals("others", getFileType("application/zip"));
     }
 

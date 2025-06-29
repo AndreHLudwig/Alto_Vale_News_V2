@@ -10,7 +10,7 @@ class PublicacaoTest {
 
 //Testes título
     @Test
-    void setTituloValido() {
+    void ct01_setTituloValido() {
         Publicacao pub = new Publicacao();
         String titulo = "Título válido com mais de 15";
         assertDoesNotThrow(() -> pub.setTitulo(titulo));
@@ -18,25 +18,25 @@ class PublicacaoTest {
     }
 
     @Test
-    void setTituloNulo() {
+    void ct02_setTituloNulo() {
         Publicacao pub = new Publicacao();
         assertThrows(IllegalArgumentException.class, () -> pub.setTitulo(null));
     }
 
     @Test
-    void setTituloVazioOuEspaco() {
+    void ct03_setTituloVazioOuEspaco() {
         Publicacao pub = new Publicacao();
         assertThrows(IllegalArgumentException.class, () -> pub.setTitulo(" "));
     }
 
     @Test
-    void setTituloSeMenorQue15() {
+    void ct04_0setTituloSeMenorQue15() {
         Publicacao pub = new Publicacao();
         assertThrows(IllegalArgumentException.class, () -> pub.setTitulo("Titulo curto"));
     }
 
     @Test
-    void setTituloDeveMaiorQue150() {
+    void ct05_setTituloDeveMaiorQue150() {
         Publicacao pub = new Publicacao();
         String longTitulo = "a".repeat(151);
         assertThrows(IllegalArgumentException.class, () -> pub.setTitulo(longTitulo));
@@ -44,7 +44,7 @@ class PublicacaoTest {
 
     //Teste Texto
     @Test
-    void setTextoValido() {
+    void ct06_setTextoValido() {
         Publicacao pub = new Publicacao();
         String textoValido = "a".repeat(500);
         assertDoesNotThrow(() -> pub.setTexto(textoValido));
@@ -52,19 +52,19 @@ class PublicacaoTest {
     }
 
     @Test
-    void setTextoNulo() {
+    void ct07_setTextoNulo() {
         Publicacao pub = new Publicacao();
         assertThrows(IllegalArgumentException.class, () -> pub.setTexto(null));
     }
 
     @Test
-    void setTextoVazioOuEspaco() {
+    void ct08_setTextoVazioOuEspaco() {
         Publicacao pub = new Publicacao();
         assertThrows(IllegalArgumentException.class, () -> pub.setTexto("   "));
     }
 
     @Test
-    void setTextoMenorQue500() {
+    void ct09_setTextoMenorQue500() {
         Publicacao pub = new Publicacao();
         String textoCurto = "a".repeat(499);
         assertThrows(IllegalArgumentException.class, () -> pub.setTexto(textoCurto));
@@ -73,7 +73,7 @@ class PublicacaoTest {
 
     //Teste visibilidade VIP
     @Test
-    void setVisibilidadeVipComoTrue() {
+    void ct20_setVisibilidadeVipComoTrue() {
         Publicacao publicacao = new Publicacao();
         publicacao.setVisibilidadeVip(true);
 
@@ -81,7 +81,7 @@ class PublicacaoTest {
     }
 
     @Test
-    void setVisibilidadeVipComoFalse() {
+    void ct21_setVisibilidadeVipComoFalse() {
         Publicacao publicacao = new Publicacao();
         publicacao.setVisibilidadeVip(false);
 
