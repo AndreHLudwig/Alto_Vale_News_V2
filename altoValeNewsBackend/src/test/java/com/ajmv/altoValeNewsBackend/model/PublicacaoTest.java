@@ -73,7 +73,7 @@ class PublicacaoTest {
 
     //Teste visibilidade VIP
     @Test
-    void CT20_deveDefinirVisibilidadeVipComoTrue() {
+    void setVisibilidadeVipComoTrue() {
         Publicacao publicacao = new Publicacao();
         publicacao.setVisibilidadeVip(true);
 
@@ -81,7 +81,7 @@ class PublicacaoTest {
     }
 
     @Test
-    void deveDefinirVisibilidadeVipComoFalse() {
+    void setVisibilidadeVipComoFalse() {
         Publicacao publicacao = new Publicacao();
         publicacao.setVisibilidadeVip(false);
 
