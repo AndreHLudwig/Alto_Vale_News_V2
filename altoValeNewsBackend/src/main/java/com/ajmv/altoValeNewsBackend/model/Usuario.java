@@ -18,6 +18,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq")
     @SequenceGenerator(name = "usuario_seq", sequenceName = "usuario_user_id_seq", allocationSize = 1)
     @Column(name = "user_id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer userId;
 
     private String nome;
