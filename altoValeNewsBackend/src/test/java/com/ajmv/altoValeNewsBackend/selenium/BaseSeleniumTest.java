@@ -24,7 +24,7 @@ public abstract class BaseSeleniumTest {
     protected WebDriverWait wait;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    protected UsuarioRepository usuarioRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -56,7 +56,7 @@ public abstract class BaseSeleniumTest {
         }
     }
 
-    private void waitForBackendReady() {
+    protected void waitForBackendReady() {
         System.out.println("Aguardando backend estar pronto...");
         for (int i = 0; i < 30; i++) {
             try {
