@@ -131,8 +131,6 @@ public class IntegratedSystemTest extends BaseSeleniumTest {
         assertEquals("Blumenau", cidadeAtualizada.getAttribute("value"),
                 "Cidade deveria estar atualizada");
 
-        System.out.println("✅ Perfil editado com sucesso");
-
         // ============================================================
         // ETAPA 4: ALTERAÇÃO DE SENHA (CT03)
         // ============================================================
