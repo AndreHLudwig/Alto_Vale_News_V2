@@ -49,7 +49,7 @@ class UsuarioControllerIntegrationTest {
             Usuario usuario = new Usuario();
             usuario.setEmail("crud.user@example.com");
             usuario.setCpf("11122233344");
-            usuario.setSenha("senha123");
+            usuario.setSenha("senha@123");
 
             mockMvc.perform(post("/usuario")
                             .contentType(MediaType.APPLICATION_JSON)
