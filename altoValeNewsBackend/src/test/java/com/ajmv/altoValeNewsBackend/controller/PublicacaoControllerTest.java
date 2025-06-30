@@ -131,8 +131,8 @@ public class PublicacaoControllerTest {
                         .param("visibilidadeVip", visibilidadeVip.toString())
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andDo(print())
-                .andExpect(status().isOk()) // Espera status 200 OK
-                .andExpect(jsonPath("$.publicacaoId").exists()) // Verifica se o ID foi preenchido
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.publicacaoId").exists())
                 .andExpect(jsonPath("$.titulo").value(titulo))
                 .andExpect(jsonPath("$.editor.userId").value(editor.getUserId()))
                 .andExpect(jsonPath("$.categorias.length()").value(2))
@@ -179,7 +179,7 @@ public class PublicacaoControllerTest {
                 .andExpect(status().isOk()) // Espera status 200 OK
                 .andExpect(jsonPath("$.publicacaoId").exists())
                 .andExpect(jsonPath("$.titulo").value(titulo))
-                .andExpect(jsonPath("$.visibilidadeVip").value(true)); // Verifica que é VIP na resposta
+                .andExpect(jsonPath("$.visibilidadeVip").value(true));
 
         // Verificação (Banco de Dados)
         Optional<Publicacao> savedPublicacaoOpt = publicacaoRepository.findAll().stream().findFirst();

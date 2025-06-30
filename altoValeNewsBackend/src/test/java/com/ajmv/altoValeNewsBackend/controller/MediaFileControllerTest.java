@@ -31,8 +31,6 @@ class MediaFileControllerTest {
         assertEquals(esperado, resultado);
     }
 
-
-
     @Test
     void ct13_codificarCaracteresProibidos() {
         String original = "teste @#$% .formato";
