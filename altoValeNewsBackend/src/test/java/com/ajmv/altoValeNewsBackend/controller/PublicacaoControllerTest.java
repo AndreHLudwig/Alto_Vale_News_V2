@@ -555,7 +555,8 @@ public class PublicacaoControllerTest {
         System.out.println("DEBUG: Publicação para CT29 criada com ID: " + publicacaoToDelete.getPublicacaoId());
 
         // 2. Realizar a requisição DELETE
-        mockMvc.perform(MockMvcRequestBuilders.delete("/publicacao/{id}", publicacaoToDelete.getPublicacaoId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/publicacao/{id}", publicacaoToDelete.getPublicacaoId())
+                        .param("editorId", editor.getUserId().toString()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
@@ -572,7 +573,8 @@ public class PublicacaoControllerTest {
     void ct30_TentativaExclusaoPublicacaoInexistente() throws Exception {
         Integer nonExistentId = 999;
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/publicacao/{id}", nonExistentId))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/publicacao/{id}", nonExistentId)
+                        .param("editorId", editor.getUserId().toString()))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
