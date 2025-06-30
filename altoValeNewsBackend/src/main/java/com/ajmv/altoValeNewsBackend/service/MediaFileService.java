@@ -126,7 +126,7 @@ public class MediaFileService {
         LOGGER.info("Deleted MediaFile record from database: " + id);
     }
 
-    private String getFileType(String contentType) {
+    public static String getFileType(String contentType) {
         if (contentType == null) {
             return "others";
         }

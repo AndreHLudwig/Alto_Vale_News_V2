@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -103,7 +104,12 @@ public class PublicacaoService {
             publicacao.setVideo(video);
         }
 
-        return publicacaoRepository.save(publicacao);
+        try {
+            return publicacaoRepository.save(publicacao);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Transactional
@@ -115,6 +121,14 @@ public class PublicacaoService {
         Integer editorId = Optional.ofNullable(publicacaoJson.optJSONObject("editor"))
                 .map(editorObj -> editorObj.getInt("userId"))
                 .orElseThrow(() -> new IllegalArgumentException("Campo 'editor' é obrigatório"));
+
+        if (!publicacao.getEditor().getUserId().equals(editorId)) {
+            // Lança uma exceção para indicar que o editor não é o autor
+            // Você pode criar uma exceção personalizada como AccessDeniedException
+            // Ou usar IllegalArgumentException e tratar a mensagem no Controller
+            throw new AccessDeniedException("Permissão negada: você não é o autor da publicação.");
+        }
+
 
         Usuario editor = editorRepository.findById(editorId)
                 .orElseThrow(() -> new IllegalArgumentException("Editor não encontrado: " + editorId));
@@ -207,45 +221,14 @@ public class PublicacaoService {
     }
 
     @Transactional
-    public boolean deletePublicacao(Integer id) {
+    public void deletePublicacao(Integer id, Integer editorId) {
         Publicacao publicacao = publicacaoRepository.findById(id)
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Publicação não encontrada: " + id));
 
-        if (publicacao != null) {
-            boolean deletedSuccessfully = true;
-
-            // Deleta arquivos de imagem/vídeo associados
-            if (publicacao.getImagem() != null) {
-                try {
-                    fileService.deleteMediaFile(publicacao.getImagem().getId());
-                    LOGGER.info("Deleted image file for publicacao: " + id);
-                } catch (Exception e) {
-                    LOGGER.warning("Error deleting image file for publicacao " + id + ": " + e.getMessage());
-                    deletedSuccessfully = false;
-                }
-            }
-            if (publicacao.getVideo() != null) {
-                try {
-                    fileService.deleteMediaFile(publicacao.getVideo().getId());
-                    LOGGER.info("Deleted video file for publicacao: " + id);
-                } catch (Exception e) {
-                    LOGGER.warning("Error deleting video file for publicacao " + id + ": " + e.getMessage());
-                    deletedSuccessfully = false;
-                }
-            }
-
-            try {
-                publicacaoRepository.delete(publicacao);
-                LOGGER.info("Deleted publicacao: " + id);
-            } catch (Exception e) {
-                LOGGER.severe("Error deleting publicacao " + id + " from database: " + e.getMessage());
-                deletedSuccessfully = false;
-            }
-
-            return deletedSuccessfully;
+        if (!publicacao.getEditor().getUserId().equals(editorId)) {
+            throw new AccessDeniedException("Você não tem permissão para excluir esta publicação.");
         }
-
-        return false;
+        publicacaoRepository.delete(publicacao);
     }
 
     public ResponseEntity<Publicacao> like(Integer publicacaoId, Integer usuarioId) {

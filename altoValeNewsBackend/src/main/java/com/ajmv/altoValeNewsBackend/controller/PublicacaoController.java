@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 @RequestMapping("publicacao")
@@ -62,6 +65,10 @@ public class PublicacaoController {
             LOGGER.warning("IllegalArgumentException: " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
         }
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{id}")
@@ -80,6 +87,12 @@ public class PublicacaoController {
         } catch (IllegalArgumentException e) {
             LOGGER.warning("IllegalArgumentException: " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
+        } catch (AccessDeniedException e) { // <-- NOVO CATCH AQUI
+            LOGGER.warning("AccessDeniedException: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Retorna 403 Forbidden
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -108,14 +121,18 @@ public class PublicacaoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePublicacao(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletePublicacao(
+            @PathVariable Integer id,
+            @RequestParam("editorId") Integer editorId) {
         try {
-            boolean deleted = publicacaoService.deletePublicacao(id);
-            if (deleted) {
-                return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+            publicacaoService.deletePublicacao(id, editorId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            LOGGER.warning("IllegalArgumentException: " + e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e) {
+            LOGGER.warning("AccessDeniedException: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
             LOGGER.severe("Error deleting publicacao: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

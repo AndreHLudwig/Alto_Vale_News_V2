@@ -46,7 +46,7 @@ class PublicacaoTest {
     @Test
     void ct06_setTextoValido() {
         Publicacao pub = new Publicacao();
-        String textoValido = "a".repeat(500);
+        String textoValido = "a".repeat(250);
         assertDoesNotThrow(() -> pub.setTexto(textoValido));
         assertEquals(textoValido, pub.getTexto());
     }
@@ -64,9 +64,9 @@ class PublicacaoTest {
     }
 
     @Test
-    void ct09_setTextoMenorQue500() {
+    void ct09_setTextoMaiorQue250() {
         Publicacao pub = new Publicacao();
-        String textoCurto = "a".repeat(499);
+        String textoCurto = "a".repeat(251);
         assertThrows(IllegalArgumentException.class, () -> pub.setTexto(textoCurto));
     }
 

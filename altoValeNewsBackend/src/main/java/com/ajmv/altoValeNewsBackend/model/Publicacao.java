@@ -3,6 +3,7 @@ package com.ajmv.altoValeNewsBackend.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -16,23 +17,28 @@ import lombok.NoArgsConstructor;
 public class Publicacao {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer publicacaoId;
-    @ManyToOne @JoinColumn(name = "editor_id")
+    @ManyToOne
+    @JoinColumn(name = "editor_id", nullable = false)
+    @JsonIgnoreProperties("publicacoes")
     private Usuario editor;
 
     private String titulo;
     private LocalDateTime data;
     private String texto;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true) @JoinColumn(name = "imagem_id")
+    @JsonIgnoreProperties("publicacao")
     private MediaFile imagem;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true) @JoinColumn(name = "video_id")
+    @JsonIgnoreProperties("publicacao")
     private MediaFile video;
 
-    @ManyToMany @JoinTable(
+    @ManyToMany(fetch = FetchType.EAGER) @JoinTable(
             name = "categoria_publicacao",
             joinColumns = @JoinColumn(name = "publicacao_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
+    @JsonIgnoreProperties("publicacoes")
     private List<Categoria> categorias;
 
     private Boolean visibilidadeVip;
@@ -91,8 +97,8 @@ public class Publicacao {
         if (texto == null || texto.trim().isEmpty()) {
             throw new IllegalArgumentException("Texto não pode ser vazio.");
         }
-        if (texto.length() < 500) {
-            throw new IllegalArgumentException("Texto deve ter no mínimo 500 caracteres.");
+        if (texto.length() > 250) {
+            throw new IllegalArgumentException("Texto deve ter no máximo 250 caracteres.");
         }
         this.texto = texto;
     }
@@ -122,6 +128,11 @@ public class Publicacao {
     }
 
     public Boolean isVisibilidadeVip() {
+        return visibilidadeVip;
+    }
+
+
+    public Boolean getVisibilidadeVip() {
         return visibilidadeVip;
     }
 
