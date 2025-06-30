@@ -52,8 +52,8 @@ class UsuarioControllerIntegrationTest {
             usuario.setSenha("senha123");
 
             mockMvc.perform(post("/usuario")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(usuario)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(usuario)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.email", is("crud.user@example.com")));
         }
@@ -87,8 +87,8 @@ class UsuarioControllerIntegrationTest {
             String jsonUpdate = "{\"endereco\":\"Avenida Nova, 456\", \"cidade\":\"Blumenau\"}";
 
             mockMvc.perform(patch("/usuario/" + usuarioSalvo.getUserId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonUpdate))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonUpdate))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.endereco", is("Avenida Nova, 456")));
         }
@@ -112,19 +112,19 @@ class UsuarioControllerIntegrationTest {
         void login_withValidCredentials_shouldReturn200AndToken() throws Exception {
             String loginRequestBody = "{\"email\":\"login.user@example.com\", \"senha\":\"senhaLogin\"}";
             mockMvc.perform(post("/usuario/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(loginRequestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(loginRequestBody))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.jwt", notNullValue()));
         }
-        
+
         @Test
         @DisplayName("CT05: Deve impedir login com senha errada")
         void login_withInvalidPassword_shouldReturn401() throws Exception {
             String loginRequestBody = "{\"email\":\"login.user@example.com\", \"senha\":\"senhaErrada\"}";
             mockMvc.perform(post("/usuario/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(loginRequestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(loginRequestBody))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -134,8 +134,8 @@ class UsuarioControllerIntegrationTest {
             String loginRequestBody = "{\"email\":\"naoexiste@example.com\", \"senha\":\"qualquersenha\"}";
 
             mockMvc.perform(post("/usuario/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(loginRequestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(loginRequestBody))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -154,7 +154,7 @@ class UsuarioControllerIntegrationTest {
             admin.setSenhahash(passwordEncoder.encode("admin123"));
             admin.setTipo(TipoUsuario.ADMINISTRADOR);
             admin = usuarioRepository.save(admin);
-            
+
             targetUser = new Usuario();
             targetUser.setEmail("target@example.com");
             targetUser.setCpf("00000000022");
@@ -167,11 +167,11 @@ class UsuarioControllerIntegrationTest {
         @DisplayName("CT07: Admin deve conseguir alterar tipo de usuário para Administrador")
         void setTipoUsuario_byAdmin_toAdmin_shouldReturn200() throws Exception {
             mockMvc.perform(put("/usuario/" + targetUser.getUserId() + "/tipo")
-                    .header("Admin-Id", admin.getUserId())
-                    .param("tipoUsuario", "3"))
+                            .header("Admin-Id", admin.getUserId())
+                            .param("tipoUsuario", "3"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.tipo", is("ADMINISTRADOR")));
-            
+                    .andExpect(jsonPath("$.tipo", is(3)));
+
             Usuario updatedUser = usuarioRepository.findById(targetUser.getUserId()).get();
             assertEquals(TipoUsuario.ADMINISTRADOR, updatedUser.getTipo());
         }
@@ -180,8 +180,8 @@ class UsuarioControllerIntegrationTest {
         @DisplayName("Não deve alterar tipo se ID do Admin não existir")
         void setTipoUsuario_withNonExistentAdminId_shouldReturn404() throws Exception {
             mockMvc.perform(put("/usuario/" + targetUser.getUserId() + "/tipo")
-                    .header("Admin-Id", 999)
-                    .param("tipoUsuario", "3"))
+                            .header("Admin-Id", 999)
+                            .param("tipoUsuario", "3"))
                     .andExpect(status().isNotFound());
         }
 
@@ -189,8 +189,8 @@ class UsuarioControllerIntegrationTest {
         @DisplayName("Usuário não-admin não deve conseguir alterar tipo de usuário")
         void setTipoUsuario_byNonAdmin_shouldReturn401() throws Exception {
             mockMvc.perform(put("/usuario/" + admin.getUserId() + "/tipo")
-                    .header("Admin-Id", targetUser.getUserId())
-                    .param("tipoUsuario", "3"))
+                            .header("Admin-Id", targetUser.getUserId())
+                            .param("tipoUsuario", "3"))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -198,10 +198,10 @@ class UsuarioControllerIntegrationTest {
         @DisplayName("CT08: Admin deve conseguir alterar tipo de usuário para Editor")
         void setTipoUsuario_byAdmin_toEditor_shouldReturn200() throws Exception {
             mockMvc.perform(put("/usuario/" + targetUser.getUserId() + "/tipo")
-                    .header("Admin-Id", admin.getUserId())
-                    .param("tipoUsuario", "2"))
+                            .header("Admin-Id", admin.getUserId())
+                            .param("tipoUsuario", "2"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.tipo", is("EDITOR")));
+                    .andExpect(jsonPath("$.tipo", is(2)));
 
             Usuario updatedUser = usuarioRepository.findById(targetUser.getUserId()).get();
             assertEquals(TipoUsuario.EDITOR, updatedUser.getTipo());

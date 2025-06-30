@@ -1,8 +1,7 @@
 package com.ajmv.altoValeNewsBackend.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-@JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum TipoUsuario {
     USUARIO(0),
     USUARIO_VIP(1),
@@ -32,4 +31,8 @@ public enum TipoUsuario {
         return this.name();
     }
 
+    @JsonValue
+    public Integer toJson() {
+        return codigo;
+    }
 }
